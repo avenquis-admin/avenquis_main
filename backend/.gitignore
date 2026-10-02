@@ -1,0 +1,14 @@
+
+# Secrets and Environments
+local-secrets
+local-secrets.*
+.env
+.env.*
+!.env.example
+
+node_modules/
+dist/
+coverage/
+uploads/
+*.log
+.DS_Store

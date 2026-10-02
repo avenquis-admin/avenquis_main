@@ -21,3 +21,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+/.local-secrets/
+**/.local-secrets/
+local-secrets/
+local-secrets.*
+
+.neon

@@ -1,0 +1,153 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789149068617,
+      "tag": "0000_nappy_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789150294704,
+      "tag": "0001_cool_maria_hill",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789151513157,
+      "tag": "0002_demonic_dracula",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789152663022,
+      "tag": "0003_clear_overlord",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789154719452,
+      "tag": "0004_majestic_ma_gnuci",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789155823550,
+      "tag": "0005_curved_steel_serpent",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789156211774,
+      "tag": "0006_outgoing_corsair",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789157508427,
+      "tag": "0007_wild_the_fallen",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789990000000,
+      "tag": "0008_core_app_expansion",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790000000000,
+      "tag": "0009_core_security_hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790001000000,
+      "tag": "0010_public_access_request",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790002000000,
+      "tag": "0011_control_access_request_contract",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790003000000,
+      "tag": "0012_core_control_provisioning_contract",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790004000000,
+      "tag": "0013_activation_credential_delivery",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790005000000,
+      "tag": "0014_subscription_wallet_credit_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790006000000,
+      "tag": "0015_recharge_payment_approval",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1790007000000,
+      "tag": "0016_firm_user_governance",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790093400000,
+      "tag": "0017_audit_standardization",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790262000000,
+      "tag": "0018_adaptive_local_brain",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790265600000,
+      "tag": "0019_initial_password_change",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790560800000,
+      "tag": "0020_individual_access_profile",
+      "breakpoints": true
+    }
+  ]
+}
