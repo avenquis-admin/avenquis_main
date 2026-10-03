@@ -148,6 +148,20 @@
       "when": 1790560800000,
       "tag": "0020_individual_access_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1790978198000,
+      "tag": "0021_control_core_platform_relationship",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1790978198001,
+      "tag": "0022_firm_google_ownership",
+      "breakpoints": true
     }
   ]
 }

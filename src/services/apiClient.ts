@@ -85,14 +85,12 @@ class ApiClient {
       string | number | boolean | undefined
     >,
   ): string {
-    const cleanEndpoint = endpoint.startsWith('/')
-      ? endpoint
-      : `/${endpoint}`;
+    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const baseURL = this.baseURL.endsWith('/')
+      ? this.baseURL
+      : `${this.baseURL}/`;
 
-    const url = new URL(
-      cleanEndpoint,
-      this.baseURL,
-    );
+    const url = new URL(cleanEndpoint, baseURL);
 
     if (params) {
       for (const [key, value] of Object.entries(params)) {
