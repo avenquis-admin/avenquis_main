@@ -80,7 +80,7 @@ class AuthService {
       const response =
         await apiClient.get<{
           user: AdminUser;
-        }>('http://localhost:8001/core-auth/me');
+        }>('/auth/me');
 
       if (
         response.ok &&
@@ -164,7 +164,7 @@ class AuthService {
     try {
       const response =
         await apiClient.post<LoginResponse>(
-          'http://localhost:8001/core-auth/sign-in',
+          '/auth/login',
           {
             email:
               credentials.email
@@ -271,7 +271,7 @@ class AuthService {
   public async signOut(): Promise<void> {
     try {
       await apiClient.post(
-        'http://localhost:8001/core-auth/sign-out',
+        '/auth/logout',
         {},
       );
     } catch {
