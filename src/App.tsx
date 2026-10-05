@@ -371,14 +371,24 @@ function Chatbot() {
     setLoading(true);
 
     try {
-      const response = await apiClient.post<{ output?: string }>('/core/ai/assist', {
+      type ChatbotAssistBody = {
+        success: boolean;
+        data: {
+          output: string;
+          providerMode?: string;
+          model?: string | null;
+          usageClass?: string;
+          creditsCharged?: number;
+        };
+      };
+
+      const response = await apiClient.post<ChatbotAssistBody>('/core/ai/assist', {
         prompt: userMessage,
         idempotencyKey: Math.random().toString(36).substring(7) + Date.now().toString(36),
         context: {}
       });
 
-
-      const output = response.data?.output;
+      const output = response.data?.data?.output;
       if (response.ok && output) {
         setMessages(prev => [...prev, { role: 'assistant', content: output }]);
       } else {

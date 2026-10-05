@@ -1,4 +1,4 @@
-﻿import crypto from "crypto";
+import crypto from "crypto";
 import { and, count, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
@@ -144,7 +144,7 @@ async function currentDataAnswer(input: ChatbotAssistInput, normalized: string, 
   if (/\b(what can avenquis do|what can you do|help me with)\b/i.test(q)) return 'I can help you navigate the platform, check your wallet/credit balance, review client and engagement statuses, manage documents, and guide you through Avenquis workflows.';
   if (/\bfirms?\b/i.test(q) && !/\b(status|name)\b/.test(q)) return 'Firms in Avenquis are the primary tenant workspaces. Each firm has its own users, clients, engagements, documents, and billing structures.';
   if (/\busers?\b/i.test(q)) return 'Users are invited to join Firms. They can have different roles such as Partner, Manager, or Staff, which determine their access permissions.';
-  if (/\bdocuments?\b/i.test(q)) return 'You can securely upload, organize, and manage documents within the Document Vault or directly on specific client engagements. We also support integration with Google Drive.';
+  if (/\bdocuments?\b/i.test(q)) return 'You can securely upload, organize, and manage documents within the Document Vault or directly on specific client engagements. Avenquis can integrate with Google Drive when configured.';
   if (/\b(ai|agents?)\b/i.test(q)) return 'Avenquis provides AI-powered assistance for general inquiries and professional guidance using our secure Local Brain and external AI providers, charging credits based on request complexity.';
   if (/\bautomations?\b/i.test(q)) return 'Avenquis supports automated document requests, scheduled reminders, and basic workflow transitions to reduce manual follow-ups.';
   if (/\bapprovals?\b/i.test(q)) return 'Work papers and timesheets can be routed for Review and Partner Sign-off. You can track all pending approvals in the Review & Sign-offs dashboard.';
