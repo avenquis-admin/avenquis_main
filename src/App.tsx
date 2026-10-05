@@ -1,3 +1,4 @@
+
 import { useState, useEffect, type ReactNode, useRef } from 'react';
 
 import { apiClient } from './services/apiClient';
@@ -370,14 +371,16 @@ function Chatbot() {
     setLoading(true);
 
     try {
-      const response = await apiClient.post<any>('/core/ai/assist', {
+      const response = await apiClient.post<{ output?: string }>('/core/ai/assist', {
         prompt: userMessage,
         idempotencyKey: Math.random().toString(36).substring(7) + Date.now().toString(36),
         context: {}
       });
 
-      if (response.ok && response.data?.data?.output) {
-        setMessages(prev => [...prev, { role: 'assistant', content: response.data.data.output }]);
+
+      const output = response.data?.output;
+      if (response.ok && output) {
+        setMessages(prev => [...prev, { role: 'assistant', content: output }]);
       } else {
         throw new Error('Invalid response');
       }
