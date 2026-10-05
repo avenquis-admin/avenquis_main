@@ -1,4 +1,5 @@
-import { useState, useEffect, type ReactNode } from 'react';
+
+import { useState, useEffect, type ReactNode, useRef } from 'react';
 
 import { apiClient } from './services/apiClient';
 
@@ -265,7 +266,7 @@ function App() {
         }
       });
     });
-  }, []); if (view === 'login') return <Login onSignIn={() => setView('dashboard')} />; const onMenu = () => setSidebarOpen(true); const content = view === 'dashboard' ? <Dashboard onPeople={() => setView('people')} onMenu={onMenu} /> : view === 'people' ? <PeopleView onMenu={onMenu} /> : view === 'engagement' ? <EngagementView onMenu={onMenu} /> : view === 'tasks' ? <TasksView onMenu={onMenu} /> : view === 'review' ? <ReviewView onMenu={onMenu} /> : view === 'workingpapers' ? <AuditView onMenu={onMenu} /> : view === 'notifications' ? <NotificationsView onMenu={onMenu} onCreate={() => setView('create')} /> : view === 'create' ? <CreateView onMenu={onMenu} /> : view === 'engagements' ? <PerformanceView onMenu={onMenu} /> : view === 'students' ? <SimplePage title="Students / Articleship" subtitle="Manage student records, batches, exams, terms and progress." endpoint="/people?type=Student" onMenu={onMenu} /> : view === 'timesheets' ? <SimplePage title="Timesheets" subtitle="Track actual time entries, attendance and approval status." endpoint="/timesheets" onMenu={onMenu} /> : view === 'documents' ? <SimplePage title="Document Vault" subtitle="Find, organize and securely access client and engagement documents." endpoint="/documents" onMenu={onMenu} /> : view === 'requests' ? <SimplePage title="Client Requests" subtitle="Track incoming information requests, response times and deadlines." endpoint="/client-portal/document-requests" onMenu={onMenu} /> : view === 'finance' ? <SimplePage title="Office Finance" subtitle="Manage firm income, receivables, expenses, invoices and payments in BDT." endpoint="/finance/invoices" onMenu={onMenu} /> : <SimplePage title="Settings" subtitle="Manage firm profile, users, permissions, workflows and preferences." endpoint="/firm/settings" onMenu={onMenu} />; return <div className="app-shell"><div className={sidebarOpen ? 'sidebar-backdrop open' : 'sidebar-backdrop'} onClick={() => setSidebarOpen(false)} /><div className={sidebarOpen ? 'sidebar-wrap open' : 'sidebar-wrap'}><Sidebar view={view} onNavigate={(next) => { setView(next); setSidebarOpen(false); }} /></div><div className="main-shell">{content}</div></div>; }
+  }, []); if (view === 'login') return <Login onSignIn={() => setView('dashboard')} />; const onMenu = () => setSidebarOpen(true); const content = view === 'dashboard' ? <Dashboard onPeople={() => setView('people')} onMenu={onMenu} /> : view === 'people' ? <PeopleView onMenu={onMenu} /> : view === 'engagement' ? <EngagementView onMenu={onMenu} /> : view === 'tasks' ? <TasksView onMenu={onMenu} /> : view === 'review' ? <ReviewView onMenu={onMenu} /> : view === 'workingpapers' ? <AuditView onMenu={onMenu} /> : view === 'notifications' ? <NotificationsView onMenu={onMenu} onCreate={() => setView('create')} /> : view === 'create' ? <CreateView onMenu={onMenu} /> : view === 'engagements' ? <PerformanceView onMenu={onMenu} /> : view === 'students' ? <SimplePage title="Students / Articleship" subtitle="Manage student records, batches, exams, terms and progress." endpoint="/people?type=Student" onMenu={onMenu} /> : view === 'timesheets' ? <SimplePage title="Timesheets" subtitle="Track actual time entries, attendance and approval status." endpoint="/timesheets" onMenu={onMenu} /> : view === 'documents' ? <SimplePage title="Document Vault" subtitle="Find, organize and securely access client and engagement documents." endpoint="/documents" onMenu={onMenu} /> : view === 'requests' ? <SimplePage title="Client Requests" subtitle="Track incoming information requests, response times and deadlines." endpoint="/client-portal/document-requests" onMenu={onMenu} /> : view === 'finance' ? <SimplePage title="Office Finance" subtitle="Manage firm income, receivables, expenses, invoices and payments in BDT." endpoint="/finance/invoices" onMenu={onMenu} /> : <SimplePage title="Settings" subtitle="Manage firm profile, users, permissions, workflows and preferences." endpoint="/firm/settings" onMenu={onMenu} />; return <div className="app-shell"><div className={sidebarOpen ? 'sidebar-backdrop open' : 'sidebar-backdrop'} onClick={() => setSidebarOpen(false)} /><div className={sidebarOpen ? 'sidebar-wrap open' : 'sidebar-wrap'}><Sidebar view={view} onNavigate={(next) => { setView(next); setSidebarOpen(false); }} /></div><div className="main-shell">{content}</div><Chatbot /></div>; }
 
 
 function CreateModal({ type, onClose }: { type: string; onClose: () => void }) {
@@ -344,6 +345,151 @@ function CreateModal({ type, onClose }: { type: string; onClose: () => void }) {
         <div style={{display:'flex', justifyContent:'space-between'}}>
           <button onClick={onClose} style={{padding:'8px 16px'}}>Cancel</button>
           <button onClick={handleSubmit} disabled={loading} style={{padding:'8px 16px', background:'#2b5a50', color:'#fff'}}>{loading ? 'Saving...' : 'Save'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function Chatbot() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([{ role: 'assistant', content: 'Hi there! I am the Avenquis Assistant. How can I help you today?' }]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, loading]);
+
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+    const userMessage = input.trim();
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setLoading(true);
+
+    try {
+      type ChatbotAssistBody = {
+        success: boolean;
+        data: {
+          output: string;
+          providerMode?: string;
+          model?: string | null;
+          usageClass?: string;
+          creditsCharged?: number;
+        };
+      };
+
+      const response = await apiClient.post<ChatbotAssistBody>('/core/ai/assist', {
+        prompt: userMessage,
+        idempotencyKey: Math.random().toString(36).substring(7) + Date.now().toString(36),
+        context: {}
+      });
+
+      const output = response.data?.data?.output;
+      if (response.ok && output) {
+        setMessages(prev => [...prev, { role: 'assistant', content: output }]);
+      } else {
+        throw new Error('Invalid response');
+      }
+    } catch (error) {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'The AI response service is temporarily unavailable. I can still help with supported Avenquis platform questions.'
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        style={{
+          position: 'fixed', bottom: 24, right: 24, zIndex: 9999,
+          width: 56, height: 56, borderRadius: 28, background: '#2b5a50', color: 'white',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)', cursor: 'pointer', border: 'none'
+        }}
+      >
+        <Sparkles size={24} />
+      </button>
+    );
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 24, right: 24, zIndex: 10000,
+      width: 380, height: 600, maxHeight: 'calc(100vh - 48px)',
+      background: 'white', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #e2e8f0'
+    }}>
+      <div style={{
+        padding: '16px 20px', background: '#2b5a50', color: 'white',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Sparkles size={18} />
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 500 }}>Avenquis Assistant</h3>
+        </div>
+        <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: 4, display: 'flex' }}>
+          <X size={18} />
+        </button>
+      </div>
+
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: 20, display: 'flex', flexDirection: 'column', gap: 16, background: '#f8fafc' }}>
+        {messages.map((msg, i) => (
+          <div key={i} style={{
+            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+            background: msg.role === 'user' ? '#2b5a50' : 'white',
+            color: msg.role === 'user' ? 'white' : '#1e293b',
+            padding: '12px 16px', borderRadius: 12, maxWidth: '85%',
+            border: msg.role === 'assistant' ? '1px solid #e2e8f0' : 'none',
+            fontSize: 14, lineHeight: 1.5,
+            borderBottomRightRadius: msg.role === 'user' ? 4 : 12,
+            borderBottomLeftRadius: msg.role === 'assistant' ? 4 : 12,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+          }}>
+            {msg.content}
+          </div>
+        ))}
+        {loading && (
+          <div style={{ alignSelf: 'flex-start', background: 'white', padding: '12px 16px', borderRadius: 12, border: '1px solid #e2e8f0', color: '#64748b', fontSize: 14 }}>
+            Thinking...
+          </div>
+        )}
+      </div>
+
+      <div style={{ padding: 16, background: 'white', borderTop: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'flex', gap: 8, background: '#f1f5f9', padding: '8px 12px', borderRadius: 24, alignItems: 'flex-end' }}>
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="Ask anything..."
+            rows={1}
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', resize: 'none', padding: '4px 0', fontSize: 14, maxHeight: 120, minHeight: 24, color: '#0f172a' }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || loading}
+            style={{
+              background: input.trim() && !loading ? '#2b5a50' : '#cbd5e1',
+              color: 'white', border: 'none', width: 32, height: 32, borderRadius: 16,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() && !loading ? 'pointer' : 'default',
+              transition: 'background 0.2s'
+            }}
+          >
+            <Send size={14} style={{ marginLeft: 2 }} />
+          </button>
         </div>
       </div>
     </div>
