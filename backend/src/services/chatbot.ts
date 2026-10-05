@@ -146,9 +146,9 @@ async function currentDataAnswer(input: ChatbotAssistInput, normalized: string, 
   if (/\busers?\b/i.test(q)) return 'Users are invited to join Firms. They can have different roles such as Partner, Manager, or Staff, which determine their access permissions.';
   if (/\bdocuments?\b/i.test(q)) return 'You can securely upload, organize, and manage documents within the Document Vault or directly on specific client engagements. Avenquis can integrate with Google Drive when configured.';
   if (/\b(ai|agents?)\b/i.test(q)) return 'Avenquis provides AI-powered assistance for general inquiries and professional guidance using our secure Local Brain and external AI providers, charging credits based on request complexity.';
-  if (/\bautomations?\b/i.test(q)) return 'Avenquis supports automated document requests, scheduled reminders, and basic workflow transitions to reduce manual follow-ups.';
-  if (/\bapprovals?\b/i.test(q)) return 'Work papers and timesheets can be routed for Review and Partner Sign-off. You can track all pending approvals in the Review & Sign-offs dashboard.';
-  if (/\bgoogle drive\b/i.test(q)) return 'Avenquis can connect to your firm\'s Google Drive to sync engagement folders and documents automatically when properly configured by an administrator.';
+  if (/\bautomations?\b/i.test(q)) return 'Avenquis helps manage document requests and workflow tracking to reduce manual follow-ups.';
+  if (/\bapprovals?\b/i.test(q)) return 'Work papers and timesheets can be routed for review. You can track these in the platform.';
+  if (/\bgoogle drive\b/i.test(q)) return 'Google Drive integration may be available when configured by an administrator.';
   if (/\b(navigation|how to find)\b/i.test(q) || q === 'help') return 'You can navigate using the left sidebar to access the Dashboard, Office & People, Clients & Engagements, Audit & Docs, Finance, and Settings.';
 
   if (/\b(wallet|credit) balance\b/.test(q)) {
