@@ -382,7 +382,7 @@ function Chatbot() {
         };
       };
 
-      const response = await apiClient.post<ChatbotAssistBody>('/core/ai/assist', {
+      const response = await apiClient.post<ChatbotAssistBody>('/ai/assist', {
         prompt: userMessage,
         idempotencyKey: Math.random().toString(36).substring(7) + Date.now().toString(36),
         context: {}
