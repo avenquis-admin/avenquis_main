@@ -297,3 +297,116 @@ When uncertain, protect:
 history → deployment stability → UI polish**
 
 in that order.
+
+
+## Additional Credential & Secret Security Rules (New)
+
+1. **Never print, echo, log, paste, display, or report any secret value.** This includes API tokens, Bearer tokens, GitHub tokens, Render tokens, Vercel tokens, Neon/Supabase credentials, DATABASE_URL values, JWT secrets, passwords, private keys, session cookies, SMTP credentials, OAuth secrets, webhook secrets, and provider access keys.
+2. **Never place a literal secret inside a terminal command** where it could appear in command history, logs, screenshots, process listings, Antigravity transcripts, or task reports.
+3. **Never print an environment variable value just to verify its existence.** You may report presence/absence, e.g., `RENDER_API_TOKEN: PRESENT` without showing the actual value.
+4. **Never search shell history, credential managers, config folders, local files, or environment variables for credentials unless explicitly authorized.** If a secret is unexpectedly encountered, STOP immediately and report only the secret type and location.
+5. **If a secret appears in any transcript, log, or report, treat it as potentially compromised** and recommend revocation/rotation.
+
+## Additional External Provider Access Rules (New)
+
+7. Having access to a credential does **not** imply permission to use it.
+8. **Do not invoke** Render, Vercel, GitHub, Neon, Supabase, Google, SMTP, or any external provider APIs merely because credentials are available.
+9. External provider actions must be explicitly authorized within the current task scope.
+10. Do not inspect unrelated projects, services, databases, organizations, users, billing, environment variables, secrets, or logs.
+11. Do not broaden access beyond the exact Avenquis resource required for the current task.
+
+## Additional Git Control Rules (New)
+
+12. Never commit unless the current task explicitly permits commit.
+13. Never push unless the current task explicitly permits push.
+14. If the instruction says inspection only, audit only, verify only, or forbids commit/push, treat that restriction as absolute.
+15. Successful tests or builds do **not** grant permission to commit or push.
+16. Never force‑push or rewrite published history without explicit approval.
+
+## Additional Deployment Control Rules (New)
+
+17. Never deploy to production unless the current task explicitly authorizes deployment.
+18. If pushing to GitHub automatically triggers Vercel or Render deployment, treat the push as a production‑affecting action.
+19. Therefore, if deployment is not authorized, **do not** push a commit that will trigger deployment.
+20. Never trigger Render/Vercel deployments merely because a build succeeded.
+21. Never use a raw Bearer token directly in curl or other commands to access production providers; use approved secure mechanisms.
+22. Never change production environment variables without explicit approval.
+23. Never delete production environment variables without explicit approval.
+
+## Additional Database Safety Rules (New)
+
+24. Never use production database credentials for local automated tests by default.
+25. Never point tests at production data.
+26. Never mutate production data during debugging, diagnosis, audit, or verification unless explicitly authorized for the exact write operation.
+27. Never drop, truncate, reset, or destructively migrate production data without explicit approval and a recovery plan.
+
+## Additional Auth / RBAC / Tenant Security Rules (New)
+
+28. Never weaken authentication to make a feature work.
+29. Never weaken RBAC to bypass an authorization problem.
+30. Never weaken tenant isolation.
+31. Never disable cookie security, CORS security, CSRF protection, or other security controls simply to make login work.
+32. Always verify whether you are modifying `avenquis_main` or `avenquis_contrl_panel` before changing authentication logic.
+33. Do **not** copy Control Panel authentication assumptions into Main.
+34. Specifically, do **not** introduce PLATFORM_SUPER_ADMIN requirements into Avenquis Main firm‑user authentication unless the approved architecture explicitly requires it.
+35. X‑Firm‑Id or other tenant context must come from legitimate authenticated firm membership. Never hardcode a production firm ID.
+
+## Additional Production Claims Rules (New)
+
+36. Never claim LIVE, production healthy, completely fixed, production ready, or bug‑free without direct verification.
+37. A successful build is NOT proof of a successful deployment.
+38. A successful Git push is NOT proof that production works.
+39. Do not claim a database/provider is down, paused, missing, broken, or misconfigured unless verified against the correct target environment.
+40. Clearly distinguish CONFIRMED, UNVERIFIED, and INFERRED states.
+
+## Additional Temporary Files Rules (New)
+
+41. Never create temporary scripts containing credentials.
+42. Never commit `.env`, `.env.local`, `.env.test`, credential files, private keys, tokens, session data, or secret caches.
+43. Safe `.env.example` files may contain variable names and placeholder values only.
+
+## Additional Mandatory Stop Conditions (New)
+
+STOP immediately and report if:
+- a secret is unexpectedly exposed
+- a command would print a credential
+- an unauthorized production action is required
+- an unexpected local modification could be overwritten
+- production data may be damaged
+- cross‑tenant access is discovered
+- auth bypass is discovered
+- required action conflicts with SKILL.md or STRICT_RULES.md
+- the task requires a commit/push/deploy that was not explicitly authorized
+
+Stopping is correct behavior.
+
+## Additional Pre‑Action Check (New)
+
+Before ANY commit, push, deployment, production API call, production database write, environment‑variable change, credential rotation, or provider configuration change, verify:
+1. Exact target is known.
+2. Current task explicitly permits the action.
+3. Git branch/status is understood.
+4. No secret will be exposed.
+5. Security and tenant isolation remain intact.
+6. Required tests/checks have been performed.
+7. Recovery/rollback is understood where relevant.
+8. User approval exists when required.
+
+If ANY condition fails, STOP.
+
+## Additional Governance Incident Rule (New)
+
+If Antigravity violates any of these rules, report it as a **GOVERNANCE INCIDENT** stating:
+- rule category violated
+- action occurred
+- resource affected
+- whether production may have been affected
+- required remediation
+Never repeat exposed credentials in the incident report.
+
+## Additional Final Priority (New)
+
+When uncertain, protect in this order:
+**DATA → SECURITY → AUDIT INTEGRITY → WORKING FUNCTIONALITY → REPOSITORY HISTORY → DEPLOYMENT STABILITY → UI POLISH**
+
+--- End of Additional Rules ---
