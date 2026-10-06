@@ -1,4 +1,4 @@
-﻿import { AdminUser } from '../types';
+import { AdminUser } from '../types';
 import { apiClient } from './apiClient';
 
 const AUTH_STORAGE_KEY =
@@ -28,9 +28,10 @@ export interface AuthResult {
 }
 
 type LoginResponse = {
-  user: AdminUser;
-  token: string;
-  expiresAt: string;
+  id: number;
+  email: string;
+  platformRole: string;
+  mustChangePassword: boolean;
 };
 
 class AuthService {
@@ -52,10 +53,7 @@ class AuthService {
           AUTH_STORAGE_KEY,
         );
 
-      const token =
-        localStorage.getItem(TOKEN_KEY);
-
-      if (stored && token) {
+      if (stored) {
         this.currentUser =
           JSON.parse(stored);
       } else {
@@ -67,34 +65,24 @@ class AuthService {
   }
 
   public async bootstrap(): Promise<void> {
-    const token =
-      localStorage.getItem(TOKEN_KEY);
-
-    if (!token) {
-      this.currentUser = null;
-      this.notify();
-      return;
-    }
-
     try {
       const response =
         await apiClient.get<{
-          user: AdminUser;
+          success: boolean;
+          data: AdminUser;
         }>('/auth/me');
 
       if (
         response.ok &&
-        response.data?.user &&
-        response.data.user.role ===
-          'PLATFORM_SUPER_ADMIN'
+        response.data?.data
       ) {
         this.currentUser =
-          response.data.user;
+          response.data.data;
 
         localStorage.setItem(
           AUTH_STORAGE_KEY,
           JSON.stringify(
-            response.data.user,
+            response.data.data,
           ),
         );
       } else {
@@ -163,7 +151,7 @@ class AuthService {
 
     try {
       const response =
-        await apiClient.post<LoginResponse>(
+        await apiClient.post<{ success: boolean; data: LoginResponse }>(
           '/auth/login',
           {
             email:
@@ -179,38 +167,23 @@ class AuthService {
           },
         );
 
-      const {
-        user,
-        token,
-        expiresAt,
-      } = response.data;
+      const user = response.data.data;
 
-      if (
-        user.role !==
-        'PLATFORM_SUPER_ADMIN'
-      ) {
-        return {
-          success: false,
-          errorMessage:
-            'Platform administrator access required.',
-          errorCode:
-            'UNAUTHORIZED_ROLE',
-        };
+      // Fetch full user details from /auth/me now that we have the cookie
+      const meResponse = await apiClient.get<{ success: boolean; data: AdminUser }>('/auth/me');
+      
+      if (!meResponse.ok || !meResponse.data?.data) {
+        throw new Error('Failed to fetch user profile after login.');
       }
 
+      const fullUser = meResponse.data.data;
+
       const storedUser = {
-        ...user,
-        sessionExpiresAt:
-          expiresAt,
+        ...fullUser,
       } as AdminUser;
 
       this.currentUser =
         storedUser;
-
-      localStorage.setItem(
-        TOKEN_KEY,
-        token,
-      );
 
       localStorage.setItem(
         AUTH_STORAGE_KEY,

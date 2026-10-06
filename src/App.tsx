@@ -176,30 +176,165 @@ function TasksView({ onMenu }: { onMenu: () => void }) {
   return <><TopBar onMenu={onMenu} /><main className="page-content crm-page"><div className="crm-heading"><div><div className="eyebrow-date">MONDAY, 12 OCTOBER 2026</div><h1>Tasks &amp; Deadlines</h1><p>Plan, assign and track tasks across all engagements, with clear deadlines and accountability.</p></div></div><CrmTabs active={tab} tabs={['All Tasks (48)', 'My Tasks (12)', 'Team Tasks (36)', 'Overdue (6)']} onChange={setTab} /><div className="crm-metrics five"><CrmMetric icon={FileCheck2} title="Total Tasks" value="48" change="12%" tone="sky" /><CrmMetric icon={CheckCircle2} title="Completed" value="20" change="42%" tone="mint" /><CrmMetric icon={Clock3} title="In Progress" value="20" change="8%" tone="cream" /><CrmMetric icon={AlertTriangle} title="Overdue" value="6" change="50%" tone="rose" down /><CrmMetric icon={CalendarDays} title="Due This Week" value="14" change="27%" tone="lilac" /></div><CrmFilterBar placeholder="Search tasks, client, engagement, or assignee..." value={query} onSearch={setQuery} action={<button className="primary-small"><Plus size={14} /> Add Task</button>}><label>Engagement <select><option>All Engagements</option></select></label><label>Assignee <select><option>All Assignees</option></select></label><label>Status <select><option>All Status</option></select></label><label>Priority <select><option>All Priority</option></select></label></CrmFilterBar><div className="crm-content-grid"><div className="crm-table-card"><div className="crm-card-header"><h2>Tasks ({filteredTasks.length === tasks.length ? 48 : filteredTasks.length})</h2><button>View all <ArrowRight size={13} /></button></div><div className="table-scroll"><table className="crm-table tasks-table"><thead><tr><th><input type="checkbox" /></th><th>Task &amp; Reference</th><th>Client / Engagement</th><th>Assignee</th><th>Due Date</th><th>Priority</th><th>Status</th><th>Progress</th><th>Actions</th></tr></thead><tbody>{filteredTasks.map(task => <tr key={task.title}><td><input type="checkbox" /></td><td><strong>{task.title}</strong><small>{task.code}</small></td><td><strong>{task.client}</strong><small>Statutory Audit 2025-26</small></td><td><span className={`crm-avatar ${task.tone}`}>{task.initials}</span>{task.assignee}</td><td className={task.due === '12 Oct 2026' ? 'overdue-date' : ''}>{task.due}{task.due === '12 Oct 2026' && <small>(Overdue)</small>}</td><td><span className={`priority ${task.priority.toLowerCase()}`}>{task.priority}</span></td><td><TaskStatusButton status={task.status as TaskStatus} onChange={status => updateStatus(task.title, status)} /></td><td><div className="crm-progress"><span style={{ width: `${task.progress}%` }} /></div><small>{task.progress}%</small></td><td><button className="dots"><MoreHorizontal size={17} /></button></td></tr>)}</tbody></table></div><div className="crm-table-footer"><span>Showing 1 to {Math.min(filteredTasks.length, 10)} of 48 tasks</span><div><button>‹</button><button className="current">1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>›</button></div></div></div><div className="crm-side-stack"><div className="crm-side-card calendar-card"><div className="crm-side-heading"><h3>Calendar / Deadlines</h3><span>October 2026</span></div><div className="calendar-days">{['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(day => <b key={day}>{day}</b>)}{['27','28','29','30','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'].map((day, i) => <span className={day === '12' ? 'today' : day === '6' || day === '15' || day === '22' ? 'marked' : ''} key={`${day}-${i}`}>{day}</span>)}</div></div><div className="crm-side-card"><div className="crm-side-heading"><h3>Upcoming Deadlines</h3><button>View all <ArrowRight size={13} /></button></div><div className="deadline-list">{crmTasks.slice(0, 5).map(task => <div key={task.title}><i className={`deadline-dot ${task.priority.toLowerCase()}`} /><strong>{task.due}</strong><span>{task.title}<small>Silco Pharmaceuticals PLC</small></span><b className={`priority ${task.priority.toLowerCase()}`}>{task.priority}</b></div>)}</div></div><TaskDistribution /></div></div></main></>;
 }
 
-const clients = [
-  ['Silco Pharmaceuticals PLC', 'Pharmaceuticals', 'Dr. Arif Hossain', 'Shafi Uddin Ahmed, FCA', '4', '3', '৳ 1,200,000', 'LOW', 'Active', 'SI'],
-  ['Genex Infosys PLC', 'Technology & IT', 'Md. Arif Hossain', 'Zahirul Islam, FCA', '3', '2', '৳ 1,000,000', 'LOW', 'Active', 'GE'],
-  ['BD Paint', 'Manufacturing', 'Rezaul Karim', 'Fouzia Haque, FCA', '2', '4', '৳ 800,000', 'MEDIUM', 'Review', 'BD'],
-  ['Advent', 'Pharmaceuticals', 'Kazi Tariqul Islam', 'Zahirul Islam, FCA', '2', '1', '৳ 900,000', 'LOW', 'Active', 'AD'],
-  ['Master Feed Agrotech PLC', 'Food & Agrotech', 'Kabir Ahmed', 'Shafi Uddin Ahmed, FCA', '3', '2', '৳ 750,000', 'MEDIUM', 'Active', 'MF'],
-  ['Fortune Shoe', 'Textile & Footwear', 'Nusrat Jahan', 'Fouzia Haque, FCA', '1', '1', '৳ 600,000', 'HIGH', 'Dormant', 'FS'],
-  ['NRB Club Ltd.', 'Hospitality & Clubs', 'Mehedi Hasan', 'Mahmudur Rahman, ACA', '2', '3', '৳ 1,300,000', 'LOW', 'Active', 'NR'],
-  ['Abdul Monem Ltd. (Igloo)', 'Manufacturing', 'Sadia Khan', 'Zahirul Islam, FCA', '1', '0', '৳ 500,000', 'MEDIUM', 'Active', 'AM'],
-];
+// Mock clients array removed
 
 function ClientDrawer({ client, onClose, onAction }: { client: string[]; onClose: () => void; onAction: (action: string) => void }) {
   return <><div className="drawer-backdrop" onClick={onClose} /><aside className="client-drawer"><button className="drawer-close" onClick={onClose}><X size={18} /></button><span className="drawer-avatar">{client[9]}</span><div className="drawer-kicker">CLIENT PROFILE</div><h2>{client[0]}</h2><p>{client[1]} · Active client</p><div className="drawer-actions"><button onClick={() => onAction('Call logged')}><Phone size={15} /> Log Call</button><button onClick={() => onAction('Email draft created')}><Send size={15} /> Send Email</button><button onClick={() => onAction('Note added')}><FileText size={15} /> Add Note</button></div><div className="drawer-score"><span>Engagement score</span><strong>84</strong><div><span style={{ width: '84%' }} /></div><small>Excellent relationship health</small></div><div className="drawer-section"><h3>Communication timeline</h3>{[['12 Oct','Quarterly review meeting held','Rahim Uddin'],['08 Oct','Requested management letter','Prince Mojumder'],['01 Oct','Uploaded trial balance','Client portal']].map(item => <div className="timeline-item" key={item[0]}><i /><div><strong>{item[1]}</strong><small>{item[0]} · {item[2]}</small></div></div>)}</div></aside></>;
 }
 
 function EngagementView({ onMenu }: { onMenu: () => void }) {
-  const [query, setQuery] = useState(''); const [selected, setSelected] = useState<string[] | null>(null); const [notice, setNotice] = useState('');
-  const visibleClients = clients.filter(client => client.join(' ').toLowerCase().includes(query.toLowerCase()));
+  const [query, setQuery] = useState(''); const [selected, setSelected] = useState<any | null>(null); const [notice, setNotice] = useState('');
+  
+  const { data: clientsData, loading, error } = useCoreApi<any[]>('/clients');
+  const actualClients = clientsData || [];
+  
+  const visibleClients = actualClients.filter(client => (client.name + ' ' + (client.status || '')).toLowerCase().includes(query.toLowerCase()));
   const action = (message: string) => { setNotice(message); window.setTimeout(() => setNotice(''), 2200); };
-  return <><TopBar onMenu={onMenu} /><main className="page-content crm-page"><div className="crm-heading"><div><div className="eyebrow-date">MONDAY, 12 OCTOBER 2026</div><h1>Client CRM</h1><p>Manage client relationships, key contacts, active engagements, risk profiles and outstanding matters.</p></div></div><div className="crm-metrics five"><CrmMetric icon={UserRound} title="Total Clients" value="48" change="12%" tone="sky" /><CrmMetric icon={BriefcaseBusiness} title="Active Clients" value="42" change="87.5%" tone="mint" /><CrmMetric icon={PackageOpen} title="Active Engagements" value="64" change="5 service lines" tone="cream" /><CrmMetric icon={FileText} title="Pending Requests" value="19" change="4 urgent" tone="rose" /><CrmMetric icon={CircleDollarSign} title="Outstanding Receivable" value="৳ 8.4M" change="2.1M overdue" tone="lilac" down /></div><CrmFilterBar placeholder="Search by client, company, contact person or code..." value={query} onSearch={setQuery} action={<button className="primary-small"><Plus size={14} /> New Client</button>}><label><select><option>All Industries</option></select></label><label><select><option>All Partners</option></select></label><label><select><option>All Risk Levels</option></select></label><label><select><option>All Statuses</option></select></label></CrmFilterBar><div className="crm-table-card client-portfolio"><div className="crm-card-header"><h2>Clients Portfolio <small>8 of 48</small></h2><button>Export <ChevronDown size={13} /></button></div><div className="table-scroll"><table className="crm-table client-table"><thead><tr><th><input type="checkbox" /></th><th>Client / Company</th><th>Industry</th><th>Primary Contact</th><th>Relationship Partner</th><th>Active Eng.</th><th>Pending</th><th>Receivable</th><th>Risk</th><th>Status</th><th>Actions</th></tr></thead><tbody>{visibleClients.map(client => <tr key={client[0]}><td><input type="checkbox" /></td><td><div className="client-name"><span className="crm-avatar gold">{client[9]}</span><div><strong>{client[0]}</strong><small>ID: CL-00{clients.indexOf(client) + 1} · Year End: 30 Jun</small></div></div></td><td><span className="industry-pill">{client[1]}</span></td><td><strong>{client[2]}</strong><small>Chief Financial Officer</small></td><td><strong>{client[3]}</strong><small>Engagement Leader</small></td><td><span className="count-chip mint-chip"><BriefcaseBusiness size={11} /> {client[4]}</span></td><td><span className="count-chip rose-chip">◉ {client[5]}</span></td><td>{client[6]}</td><td><span className={`risk ${client[7].toLowerCase()}`}>{client[7]}</span></td><td><span className={`client-status ${client[8].toLowerCase()}`}>{client[8]}</span></td><td><button className="open-client" onClick={() => setSelected(client)}>Open Client</button></td></tr>)}</tbody></table></div><div className="crm-table-footer"><span>Showing {visibleClients.length} of 48 clients</span><div><button>‹</button><button className="current">1</button><button>2</button><button>3</button><button>4</button><button>›</button></div></div></div><div className="crm-lower-cards"><div className="crm-side-card"><div className="crm-side-heading"><h3>Recent Client Activity</h3><button>View All <ArrowRight size={13} /></button></div>{['Uploaded trial balance','Requested management letter','Provided bank confirmation','Shared tax computation','Requested document access'].map((item, i) => <div className="activity-row" key={item}><strong>{clients[i][0]}</strong><span>{item}</span><small>{['6:12 PM','4:55 PM','2:30 PM','11:15 AM','10:40 AM'][i]}</small><b className={i === 1 || i === 4 ? 'open' : ''}>{i === 1 || i === 4 ? 'Open' : 'Success'}</b></div>)}</div><div className="crm-side-card"><div className="crm-side-heading"><h3>Outstanding Client Requests</h3><button>View All <ArrowRight size={13} /></button></div>{['Provide inventory schedule','Share VAT challan copies','Confirm related party list','Provide management letter','Send bank confirmation'].map((item, i) => <div className="activity-row" key={item}><strong>{clients[i + 2][0]}</strong><span>{item}</span><small className={i === 0 ? 'overdue-date' : ''}>{12 + i * 3} Oct 2026</small><b className={i === 0 ? 'overdue' : 'open'}>{i === 0 ? 'Overdue' : 'Open'}</b></div>)}</div></div></main>{selected && <ClientDrawer client={selected} onClose={() => setSelected(null)} onAction={action} />}{notice && <div className="crm-toast"><CheckCircle2 size={16} /> {notice}</div>}</>;
+  
+  return <><TopBar onMenu={onMenu} /><main className="page-content crm-page"><div className="crm-heading"><div><div className="eyebrow-date">MONDAY, 12 OCTOBER 2026</div><h1>Client CRM</h1><p>Manage client relationships, key contacts, active engagements, risk profiles and outstanding matters.</p></div></div><div className="crm-metrics five"><CrmMetric icon={UserRound} title="Total Clients" value={String(actualClients.length)} change="Real-time" tone="sky" /><CrmMetric icon={BriefcaseBusiness} title="Active Clients" value={String(actualClients.filter(c => c.status === 'active').length)} change="Real-time" tone="mint" /><CrmMetric icon={PackageOpen} title="Active Engagements" value="0" change="Pending integration" tone="cream" /><CrmMetric icon={FileText} title="Pending Requests" value="0" change="Pending integration" tone="rose" /><CrmMetric icon={CircleDollarSign} title="Outstanding Receivable" value="৳ 0" change="Pending integration" tone="lilac" down /></div><CrmFilterBar placeholder="Search by client name..." value={query} onSearch={setQuery} action={<button className="primary-small"><Plus size={14} /> New Client</button>}><label><select><option>All Statuses</option></select></label></CrmFilterBar><div className="crm-table-card client-portfolio"><div className="crm-card-header"><h2>Clients Portfolio <small>{visibleClients.length} of {actualClients.length}</small></h2><button>Export <ChevronDown size={13} /></button></div>
+  
+  {loading && <div style={{padding: 40}}>Loading clients...</div>}
+  {error && <div style={{padding: 40, color: 'red'}}>Error: {error}</div>}
+
+  {!loading && !error && (
+  <div className="table-scroll"><table className="crm-table client-table"><thead><tr><th><input type="checkbox" /></th><th>Client / Company</th><th>Created</th><th>Status</th><th>Actions</th></tr></thead><tbody>{visibleClients.map(client => <tr key={client.id}><td><input type="checkbox" /></td><td><div className="client-name"><span className="crm-avatar gold">{client.name.substring(0, 2).toUpperCase()}</span><div><strong>{client.name}</strong><small>ID: CL-{client.id}</small></div></div></td><td>{new Date(client.createdAt).toLocaleDateString()}</td><td><span className={`client-status ${client.status.toLowerCase()}`}>{client.status}</span></td><td><button className="open-client" onClick={() => setSelected(client)}>Open Client</button></td></tr>)}</tbody></table></div>
+  )}
+
+  <div className="crm-table-footer"><span>Showing {visibleClients.length} of {actualClients.length} clients</span><div><button>‹</button><button className="current">1</button><button>›</button></div></div></div><div className="crm-lower-cards"><div className="crm-side-card"><div className="crm-side-heading"><h3>Recent Client Activity</h3><button>View All <ArrowRight size={13} /></button></div><div style={{padding: 20}}>Integration pending...</div></div><div className="crm-side-card"><div className="crm-side-heading"><h3>Outstanding Client Requests</h3><button>View All <ArrowRight size={13} /></button></div><div style={{padding: 20}}>Integration pending...</div></div></div></main>{selected && <ClientDrawer client={selected} onClose={() => setSelected(null)} onAction={action} />}{notice && <div className="crm-toast"><CheckCircle2 size={16} /> {notice}</div>}</>;
+}
+
+
+function TeamDrawer({ engagement, onClose }: { engagement: any; onClose: () => void }) {
+  const [team, setTeam] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refresh, setRefresh] = useState(0);
+
+  useEffect(() => {
+    apiClient.get<any[]>(`/engagements/${engagement.id}/team`)
+      .then(res => {
+        if (res.data) setTeam(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [engagement.id, refresh]);
+
+  const { data: people } = useCoreApi<any[]>('/people');
+  const [adding, setAdding] = useState(false);
+  const [selectedUser, setSelectedUser] = useState('');
+  const [selectedRole, setSelectedRole] = useState('JUNIOR');
+  const [saving, setSaving] = useState(false);
+
+  const mutate = () => setRefresh(r => r + 1);
+
+  const handleAdd = async () => {
+    if (!selectedUser) return;
+    setSaving(true);
+    try {
+      const res = await apiClient.post(`/engagements/${engagement.id}/team`, {
+        userId: parseInt(selectedUser),
+        role: selectedRole,
+      });
+      if (res.ok) {
+        setAdding(false);
+        setSelectedUser('');
+        mutate();
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemove = async (userId: number) => {
+    await apiClient.delete(`/engagements/${engagement.id}/team/${userId}`);
+    mutate();
+  };
+
+  const handleUpdate = async (userId: number, role: string) => {
+    const res = await apiClient.patch(`/engagements/${engagement.id}/team/${userId}`, { role });
+    mutate();
+  };
+
+  return (
+    <>
+      <div className="drawer-backdrop" onClick={onClose} />
+      <aside className="client-drawer" style={{ width: 450 }}>
+        <button className="drawer-close" onClick={onClose}><X size={18} /></button>
+        <span className="drawer-avatar"><UsersRound size={24} /></span>
+        <div className="drawer-kicker">ENGAGEMENT TEAM</div>
+        <h2>{engagement.name}</h2>
+        <p>Manage team members for this engagement.</p>
+        
+        <div className="drawer-actions">
+          <button onClick={() => setAdding(true)}><UserPlus size={15} /> Add Member</button>
+        </div>
+
+        {adding && (
+          <div style={{ padding: '15px', background: '#f8fafc', borderRadius: 8, marginBottom: 20 }}>
+            <h4 style={{ margin: '0 0 10px 0' }}>Add Team Member</h4>
+            <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} style={{ width: '100%', marginBottom: 10, padding: 8 }}>
+              <option value="">Select User...</option>
+              {(people || []).map(p => <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>)}
+            </select>
+            <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)} style={{ width: '100%', marginBottom: 10, padding: 8 }}>
+              <option value="PARTNER">Partner</option>
+              <option value="MANAGER">Manager</option>
+              <option value="SENIOR">Senior</option>
+              <option value="JUNIOR">Junior</option>
+            </select>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="primary-small" onClick={handleAdd} disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+              <button className="dots" onClick={() => setAdding(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+
+        <div className="drawer-section">
+          <h3>Current Team</h3>
+          {loading && <p>Loading team...</p>}
+          {error && <p style={{ color: 'red' }}>Failed to load team</p>}
+          {!loading && !error && team?.length === 0 && <p>No team members assigned.</p>}
+          {!loading && !error && team?.map((m: any) => (
+            <div className="team-row" key={m.userId} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <span className="crm-avatar mint">{(m.user?.firstName || m.user?.email || '?').substring(0,2).toUpperCase()}</span>
+              <div style={{ flex: 1 }}>
+                <strong>{m.user?.firstName} {m.user?.lastName}</strong>
+                <select value={m.role} onChange={e => handleUpdate(m.userId, e.target.value)} style={{ display: 'block', marginTop: 4, padding: 4 }}>
+                  <option value="PARTNER">Partner</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="SENIOR">Senior</option>
+                  <option value="JUNIOR">Junior</option>
+                </select>
+              </div>
+              <button onClick={() => handleRemove(m.userId)} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer' }}><X size={16} /></button>
+            </div>
+          ))}
+        </div>
+      </aside>
+    </>
+  );
 }
 
 function PerformanceView({ onMenu }: { onMenu: () => void }) {
-  return <><TopBar onMenu={onMenu} /><main className="page-content crm-page"><div className="crm-heading performance-heading"><div><div className="eyebrow-date">MONDAY, 12 OCTOBER 2026</div><h1>Engagement Performance</h1><p>Track progress, profitability, team utilization and key milestones across all audit and assurance engagements.</p></div><div className="heading-selects"><label>Financial Year<select><option>2025 - 26</option></select></label><label>Engagement Type<select><option>All Engagements</option></select></label></div></div><div className="crm-metrics five"><CrmMetric icon={BriefcaseBusiness} title="Total Engagements" value="18" change="20%" tone="mint" /><CrmMetric icon={CalendarCheck} title="Completed" value="6" change="50%" tone="sky" /><CrmMetric icon={Clock3} title="In Progress" value="9" change="12%" tone="cream" /><CrmMetric icon={AlertTriangle} title="Delayed" value="3" change="25%" tone="rose" down /><CrmMetric icon={BarChart3} title="Total Fee (BDT)" value="7.2M" change="18%" tone="lilac" /></div><div className="analytics-grid"><div className="analytics-card"><div className="crm-card-header"><h2>Engagement Status</h2></div><div className="status-chart"><div className="status-donut"><div><strong>18</strong><span>Total</span></div></div><div className="chart-legend"><span><i className="dot-green" />Completed <b>6 (33%)</b></span><span><i className="dot-mint" />In Progress <b>9 (50%)</b></span><span><i className="dot-gold" />Delayed <b>3 (17%)</b></span></div></div></div><div className="analytics-card fee-chart-card"><div className="crm-card-header"><h2>Fee Realization</h2><div className="chart-key"><span><i className="dot-green" />Billed</span><span><i className="dot-mint" />Received</span></div></div><div className="fee-chart"><div className="axis-labels"><span>2.0M</span><span>1.5M</span><span>1.0M</span><span>0.5M</span><span>0</span></div><div className="chart-bars">{[55,57,80,65,83,100,43,35,27,35,32,48].map((height, i) => <div className="chart-bar-group" key={i}><div><i style={{ height: `${height}%` }} /><b style={{ height: `${height * .62}%` }} /></div><small>{['Jul','Aug','Sep','Oct','Nov','Jan','Feb','Mar','Apr','May','Jun','Jun'][i]}</small></div>)}</div></div></div><div className="analytics-card"><div className="crm-card-header"><h2>Team Utilization</h2></div><div className="status-chart"><div className="util-donut"><div><strong>78%</strong><span>Utilization</span></div></div><div className="chart-legend"><span><i className="dot-green" />Billable <b>78%</b></span><span><i className="dot-mint" />Non-billable <b>12%</b></span><span><i className="dot-gold" />Leave <b>6%</b></span><span><i className="dot-blue" />Available <b>4%</b></span></div></div></div></div><CrmFilterBar placeholder="Search by client, engagement code, partner or manager..." action={<button className="primary-small"><FileText size={14} /> Export <ChevronDown size={12} /></button>}><label>Engagement Type <select><option>All Types</option></select></label><label>Status <select><option>All Status</option></select></label><label>Partner <select><option>All Partners</option></select></label></CrmFilterBar><div className="performance-bottom"><div className="crm-table-card"><div className="crm-card-header"><h2>Engagements (18)</h2><button>View all <ArrowRight size={13} /></button></div><div className="table-scroll"><table className="crm-table performance-table"><thead><tr><th>Client</th><th>Engagement Code</th><th>Engagement Type</th><th>Partner</th><th>Manager</th><th>Progress</th><th>Status</th><th>Year End</th><th>Fee (BDT)</th><th>Actions</th></tr></thead><tbody>{clients.map((client, i) => <tr key={client[0]}><td><div className="client-name"><span className={`crm-avatar ${client[9] === 'BD' ? 'rose' : 'gold'}`}>{client[9]}</span><strong>{client[0]}</strong></div></td><td>AUD-2026-00{i + 1}</td><td>{i % 2 ? 'External Audit' : 'Statutory Audit'}</td><td>Shafi Uddin Ahmed</td><td>{i % 3 ? 'Hemamrty Roy' : 'Zahirul Islam'}</td><td><div className="crm-progress"><span style={{ width: `${[70,45,20,60,35,10,90,25][i]}%` }} /></div></td><td><span className={`client-status ${i === 2 ? 'review' : i === 5 ? 'planning' : 'active'}`}>{i === 2 ? 'Awaiting Client' : i === 5 ? 'Planning' : 'In Progress'}</span></td><td>{i % 3 ? '30 Jun 2026' : '31 Dec 2026'}</td><td>{client[6]}</td><td><button className="dots"><MoreHorizontal size={17} /></button></td></tr>)}</tbody></table></div><div className="crm-table-footer"><span>Showing 1 to 8 of 18 engagements</span><div><button>‹</button><button className="current">1</button><button>2</button><button>3</button><button>›</button></div></div></div><div className="performance-side"><div className="crm-side-card"><div className="crm-side-heading"><h3>Key Milestones</h3><button>View all <ArrowRight size={13} /></button></div>{['Silco – Interim report','Genexil – Planning meeting','BD Paint – Information request','Advent – Fieldwork start','Master Feed – Draft report'].map((item, i) => <div className="milestone" key={item}><i className={i < 2 ? 'done' : i === 2 ? 'current-milestone' : ''}>{i < 2 ? '✓' : ''}</i><span>{item}</span><small>{15 + i * 5} Oct 2026</small></div>)}</div><div className="crm-side-card partner-card"><div className="crm-side-heading"><h3>Performance by Partner</h3><span>This year⌄</span></div>{[['Shafi Uddin Ahmed, FCA','42%','SZ'],['Md. Zahirul Islam','28%','MZ'],['Hemadry Roy','18%','HR'],['Md. Bayezid','12%','MB']].map(person => <div className="partner-row" key={person[0]}><span className="crm-avatar lilac">{person[2]}</span><div><strong>{person[0]}</strong><div><i style={{ width: person[1] }} /></div></div><b>{person[1]}</b></div>)}</div></div></div></main></>;
+  const { data: engagementsData, loading, error } = useCoreApi<any[]>('/engagements');
+  const actualEngagements = engagementsData || [];
+  const [selectedEng, setSelectedEng] = useState<any | null>(null);
+  
+  return <><TopBar onMenu={onMenu} /><main className="page-content crm-page"><div className="crm-heading performance-heading"><div><div className="eyebrow-date">MONDAY, 12 OCTOBER 2026</div><h1>Engagement Performance</h1><p>Track progress, profitability, team utilization and key milestones across all audit and assurance engagements.</p></div><div className="heading-selects"><label>Financial Year<select><option>2025 - 26</option></select></label><label>Engagement Type<select><option>All Engagements</option></select></label></div></div><div className="crm-metrics five"><CrmMetric icon={BriefcaseBusiness} title="Total Engagements" value={String(actualEngagements.length)} change="Real-time" tone="mint" /><CrmMetric icon={CalendarCheck} title="Completed" value={String(actualEngagements.filter(e => e.status === 'completed').length)} change="Real-time" tone="sky" /><CrmMetric icon={Clock3} title="In Progress" value={String(actualEngagements.filter(e => e.status !== 'completed').length)} change="Real-time" tone="cream" /><CrmMetric icon={AlertTriangle} title="Delayed" value="0" change="Pending integration" tone="rose" down /><CrmMetric icon={BarChart3} title="Total Fee (BDT)" value="Pending" change="Pending integration" tone="lilac" /></div><div className="analytics-grid"><div className="analytics-card"><div className="crm-card-header"><h2>Engagement Status</h2></div><div className="status-chart"><div className="status-donut"><div><strong>{actualEngagements.length}</strong><span>Total</span></div></div><div className="chart-legend"><span><i className="dot-green" />Completed</span><span><i className="dot-mint" />In Progress</span><span><i className="dot-gold" />Delayed</span></div></div></div><div className="analytics-card fee-chart-card"><div className="crm-card-header"><h2>Fee Realization</h2><div className="chart-key"><span><i className="dot-green" />Billed</span><span><i className="dot-mint" />Received</span></div></div><div className="fee-chart"><div className="axis-labels"><span>2.0M</span><span>1.5M</span><span>1.0M</span><span>0.5M</span><span>0</span></div><div className="chart-bars">{[55,57,80,65,83,100,43,35,27,35,32,48].map((height, i) => <div className="chart-bar-group" key={i}><div><i style={{ height: `${height}%` }} /><b style={{ height: `${height * .62}%` }} /></div><small>{['Jul','Aug','Sep','Oct','Nov','Jan','Feb','Mar','Apr','May','Jun','Jun'][i]}</small></div>)}</div></div></div><div className="analytics-card"><div className="crm-card-header"><h2>Team Utilization</h2></div><div className="status-chart"><div className="util-donut"><div><strong>78%</strong><span>Utilization</span></div></div><div className="chart-legend"><span><i className="dot-green" />Billable <b>78%</b></span><span><i className="dot-mint" />Non-billable <b>12%</b></span><span><i className="dot-gold" />Leave <b>6%</b></span><span><i className="dot-blue" />Available <b>4%</b></span></div></div></div></div><CrmFilterBar placeholder="Search by client, engagement code, partner or manager..." action={<button className="primary-small"><FileText size={14} /> Export <ChevronDown size={12} /></button>}><label>Engagement Type <select><option>All Types</option></select></label><label>Status <select><option>All Status</option></select></label><label>Partner <select><option>All Partners</option></select></label></CrmFilterBar><div className="performance-bottom"><div className="crm-table-card"><div className="crm-card-header"><h2>Engagements ({actualEngagements.length})</h2><button>View all <ArrowRight size={13} /></button></div>
+  
+  {loading && <div style={{padding: 40}}>Loading engagements...</div>}
+  {error && <div style={{padding: 40, color: 'red'}}>Error: {error}</div>}
+
+  {!loading && !error && (
+  <div className="table-scroll"><table className="crm-table performance-table"><thead><tr><th>Engagement</th><th>Client ID</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>{actualEngagements.map((eng) => <tr key={eng.id}><td><div className="client-name"><span className="crm-avatar gold">{eng.name.substring(0,2).toUpperCase()}</span><strong>{eng.name}</strong></div></td><td>CL-{eng.clientId}</td><td><span className={`client-status ${eng.status.toLowerCase()}`}>{eng.status}</span></td><td>{new Date(eng.createdAt).toLocaleDateString()}</td><td><button className="dots"><MoreHorizontal size={17} /></button></td></tr>)}</tbody></table></div>
+  )}
+
+  <div className="crm-table-footer"><span>Showing {actualEngagements.length} engagements</span><div><button>‹</button><button className="current">1</button><button>›</button></div></div></div><div className="performance-side"><div className="crm-side-card"><div className="crm-side-heading"><h3>Key Milestones</h3><button>View all <ArrowRight size={13} /></button></div><div style={{padding: 20}}>Integration pending...</div></div><div className="crm-side-card partner-card"><div className="crm-side-heading"><h3>Performance by Partner</h3><span>This year⌄</span></div><div style={{padding: 20}}>Integration pending...</div></div></div></div>
+  {selectedEng && <TeamDrawer engagement={selectedEng} onClose={() => setSelectedEng(null)} />}
+  </main></>;
 }
 
 function AuditView({ onMenu }: { onMenu: () => void }) {
@@ -256,29 +391,56 @@ function Login({ onSignIn }: { onSignIn: () => void }) {
 
 const rows: any[] = []; const tasks: any[] = []; const crmTasks: any[] = []; const reviewRows: any[] = []; const notifications: any[] = [];
 function App() {
-  const [view, setView] = useState<View>('dashboard');
+  const [view, setView] = useState<View>('login');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+
   useEffect(() => {
     import('./services/authService').then(({ authService }) => {
       authService.bootstrap().then(() => {
-        if (authService.getCurrentUser()) {
+        setIsBootstrapping(false);
+      });
+
+      return authService.subscribe((user) => {
+        if (!user) {
+          setView('login');
+        } else if (view === 'login') {
           setView('dashboard');
         }
       });
     });
-  }, []); if (view === 'login') return <Login onSignIn={() => setView('dashboard')} />; const onMenu = () => setSidebarOpen(true); const content = view === 'dashboard' ? <Dashboard onPeople={() => setView('people')} onMenu={onMenu} /> : view === 'people' ? <PeopleView onMenu={onMenu} /> : view === 'engagement' ? <EngagementView onMenu={onMenu} /> : view === 'tasks' ? <TasksView onMenu={onMenu} /> : view === 'review' ? <ReviewView onMenu={onMenu} /> : view === 'workingpapers' ? <AuditView onMenu={onMenu} /> : view === 'notifications' ? <NotificationsView onMenu={onMenu} onCreate={() => setView('create')} /> : view === 'create' ? <CreateView onMenu={onMenu} /> : view === 'engagements' ? <PerformanceView onMenu={onMenu} /> : view === 'students' ? <SimplePage title="Students / Articleship" subtitle="Manage student records, batches, exams, terms and progress." endpoint="/people?type=Student" onMenu={onMenu} /> : view === 'timesheets' ? <SimplePage title="Timesheets" subtitle="Track actual time entries, attendance and approval status." endpoint="/timesheets" onMenu={onMenu} /> : view === 'documents' ? <SimplePage title="Document Vault" subtitle="Find, organize and securely access client and engagement documents." endpoint="/documents" onMenu={onMenu} /> : view === 'requests' ? <SimplePage title="Client Requests" subtitle="Track incoming information requests, response times and deadlines." endpoint="/client-portal/document-requests" onMenu={onMenu} /> : view === 'finance' ? <SimplePage title="Office Finance" subtitle="Manage firm income, receivables, expenses, invoices and payments in BDT." endpoint="/finance/invoices" onMenu={onMenu} /> : <SimplePage title="Settings" subtitle="Manage firm profile, users, permissions, workflows and preferences." endpoint="/firm/settings" onMenu={onMenu} />; return <div className="app-shell"><div className={sidebarOpen ? 'sidebar-backdrop open' : 'sidebar-backdrop'} onClick={() => setSidebarOpen(false)} /><div className={sidebarOpen ? 'sidebar-wrap open' : 'sidebar-wrap'}><Sidebar view={view} onNavigate={(next) => { setView(next); setSidebarOpen(false); }} /></div><div className="main-shell">{content}</div><Chatbot /></div>; }
+  }, [view]);
+
+  if (isBootstrapping) {
+    return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
+  }
+
+  if (view === 'login') return <Login onSignIn={() => setView('dashboard')} />;
+
+  const onMenu = () => setSidebarOpen(true);
+  const content = view === 'dashboard' ? <Dashboard onPeople={() => setView('people')} onMenu={onMenu} /> : view === 'people' ? <PeopleView onMenu={onMenu} /> : view === 'engagement' ? <EngagementView onMenu={onMenu} /> : view === 'tasks' ? <TasksView onMenu={onMenu} /> : view === 'review' ? <ReviewView onMenu={onMenu} /> : view === 'workingpapers' ? <AuditView onMenu={onMenu} /> : view === 'notifications' ? <NotificationsView onMenu={onMenu} onCreate={() => setView('create')} /> : view === 'create' ? <CreateView onMenu={onMenu} /> : view === 'engagements' ? <PerformanceView onMenu={onMenu} /> : view === 'students' ? <SimplePage title="Students / Articleship" subtitle="Manage student records, batches, exams, terms and progress." endpoint="/people?type=Student" onMenu={onMenu} /> : view === 'timesheets' ? <SimplePage title="Timesheets" subtitle="Track actual time entries, attendance and approval status." endpoint="/timesheets" onMenu={onMenu} /> : view === 'documents' ? <SimplePage title="Document Vault" subtitle="Find, organize and securely access client and engagement documents." endpoint="/documents" onMenu={onMenu} /> : view === 'requests' ? <SimplePage title="Client Requests" subtitle="Track incoming information requests, response times and deadlines." endpoint="/client-portal/document-requests" onMenu={onMenu} /> : view === 'finance' ? <SimplePage title="Office Finance" subtitle="Manage firm income, receivables, expenses, invoices and payments in BDT." endpoint="/finance/invoices" onMenu={onMenu} /> : <SimplePage title="Settings" subtitle="Manage firm profile, users, permissions, workflows and preferences." endpoint="/firm/settings" onMenu={onMenu} />;
+  return <div className="app-shell"><div className={sidebarOpen ? 'sidebar-backdrop open' : 'sidebar-backdrop'} onClick={() => setSidebarOpen(false)} /><div className={sidebarOpen ? 'sidebar-wrap open' : 'sidebar-wrap'}><Sidebar view={view} onNavigate={(next) => { setView(next); setSidebarOpen(false); }} /></div><div className="main-shell">{content}</div><Chatbot /></div>;
+}
 
 
 function CreateModal({ type, onClose }: { type: string; onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [val, setVal] = useState('');
+  const [clientId, setClientId] = useState<number | ''>('');
+
+  const { data: clientsData } = useCoreApi<any[]>('/clients');
 
   const handleSubmit = async () => {
     if (!val) {
       setError('Please enter a value');
       return;
     }
+    if (type === 'engagement' && !clientId) {
+      setError('Please select a client');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -288,10 +450,10 @@ function CreateModal({ type, onClose }: { type: string; onClose: () => void }) {
     try {
       if (type === 'client') {
         endpoint = '/clients';
-        body = { name: val, industry: 'General', status: 'ACTIVE' };
+        body = { name: val, status: 'active' };
       } else if (type === 'engagement') {
         endpoint = '/engagements';
-        body = { title: val, clientId: 1, type: 'AUDIT', status: 'PLANNING' };
+        body = { name: val, clientId: Number(clientId), status: 'planning' };
       } else if (type === 'task') {
         endpoint = '/tasks';
         body = { title: val, engagementId: 1, status: 'TODO', priority: 'MEDIUM', dueDate: new Date().toISOString() };
@@ -300,8 +462,6 @@ function CreateModal({ type, onClose }: { type: string; onClose: () => void }) {
         body = { title: val, engagementId: 1, status: 'DRAFT', content: {} };
       } else if (type === 'document') {
         endpoint = '/documents/upload';
-        // Note: Real file upload needs FormData, we will just simulate JSON for now or fail gracefully if backend strictly expects multipart.
-        // Actually, backend uploadDocument uses `upload.single('file')`. We must send FormData.
       } else if (type === 'request') {
         endpoint = '/client-portal/document-requests';
         body = { title: val, clientId: 1, status: 'PENDING' };
@@ -341,6 +501,14 @@ function CreateModal({ type, onClose }: { type: string; onClose: () => void }) {
       <div style={{ background: '#fff', padding: 20, borderRadius: 8, width: 400 }}>
         <h2 style={{marginTop:0}}>Create New {type}</h2>
         <input style={{width:'100%', padding:8, marginBottom:10}} placeholder="Enter name or title..." value={val} onChange={e => setVal(e.target.value)} />
+        
+        {type === 'engagement' && (
+          <select style={{width:'100%', padding:8, marginBottom:10}} value={clientId} onChange={e => setClientId(Number(e.target.value) || '')}>
+            <option value="">Select a Client...</option>
+            {(clientsData || []).map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        )}
+
         {error && <div style={{color:'red', marginBottom:10}}>{error}</div>}
         <div style={{display:'flex', justifyContent:'space-between'}}>
           <button onClick={onClose} style={{padding:'8px 16px'}}>Cancel</button>

@@ -1,4 +1,4 @@
-﻿import { pgTable, serial, timestamp, text, pgEnum, integer, primaryKey, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, text, pgEnum, integer, primaryKey, boolean, jsonb, unique } from "drizzle-orm/pg-core";
 
 // Infrastructure testing table only for B01
 export const healthChecks = pgTable("health_checks", {
@@ -214,6 +214,25 @@ export const engagements = pgTable("engagements", {
   isArchived: boolean("is_archived").default(false).notNull(),
   archivedAt: timestamp("archived_at"),
 });
+
+export const engagementRoleEnum = pgEnum("engagement_role", [
+  "PARTNER",
+  "MANAGER",
+  "SENIOR",
+  "JUNIOR"
+]);
+
+export const engagementMembers = pgTable("engagement_members", {
+  id: serial("id").primaryKey(),
+  firmId: integer("firm_id").references(() => firms.id).notNull(),
+  engagementId: integer("engagement_id").references(() => engagements.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  role: engagementRoleEnum("role").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  unq: unique("engagement_user_unq").on(t.engagementId, t.userId)
+}));
 
 
 export const tasks = pgTable("tasks", {

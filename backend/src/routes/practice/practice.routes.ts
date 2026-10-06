@@ -1,10 +1,11 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import {
   getClients, getClientById, createClient, updateClient,
   getEngagements, getEngagementById, createEngagement, updateEngagement,
   getFirmSettings, updateFirmSettings,
   getProfile, updateProfile,
-  archiveClient, restoreClient, archiveEngagement, restoreEngagement
+  archiveClient, restoreClient, archiveEngagement, restoreEngagement,
+  getEngagementTeam, addEngagementTeamMember, removeEngagementTeamMember, updateEngagementTeamMember
 } from "./practice.controller";
 import { requireAuth } from "../../middlewares/authMiddleware";
 import { resolveFirmContext, requireEntitlement, requireFirmPermission } from "../../middlewares/tenantMiddleware";
@@ -37,5 +38,11 @@ router.post("/engagements", ...tenantMiddlewares, requireEntitlement("engagement
 router.patch("/engagements/:id", ...tenantMiddlewares, requireEntitlement("engagements"), requireFirmPermission("engagements:write"), updateEngagement);
 router.post("/engagements/:id/archive", ...tenantMiddlewares, requireEntitlement("engagements"), requireFirmPermission("engagements:write"), archiveEngagement);
 router.post("/engagements/:id/restore", ...tenantMiddlewares, requireEntitlement("engagements"), requireFirmPermission("engagements:write"), restoreEngagement);
+
+// Engagement Team
+router.get("/engagements/:id/team", ...tenantMiddlewares, requireEntitlement("engagements"), requireFirmPermission("engagements:read"), getEngagementTeam);
+router.post("/engagements/:id/team", ...tenantMiddlewares, requireEntitlement("engagements"), requireFirmPermission("engagements:write"), addEngagementTeamMember);
+router.patch("/engagements/:id/team/:userId", ...tenantMiddlewares, requireEntitlement("engagements"), requireFirmPermission("engagements:write"), updateEngagementTeamMember);
+router.delete("/engagements/:id/team/:userId", ...tenantMiddlewares, requireEntitlement("engagements"), requireFirmPermission("engagements:write"), removeEngagementTeamMember);
 
 export default router;

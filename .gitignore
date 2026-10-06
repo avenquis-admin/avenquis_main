@@ -27,3 +27,5 @@ local-secrets/
 local-secrets.*
 
 .neon
+
+.vercel/

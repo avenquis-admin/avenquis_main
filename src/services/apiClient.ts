@@ -1,4 +1,4 @@
-﻿export interface ApiRequestOptions extends RequestInit {
+export interface ApiRequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
@@ -147,12 +147,24 @@ class ApiClient {
       'Content-Type': 'application/json',
       Accept: 'application/json',
       'X-Client-Application':
-        'Avenquis-Control-Panel',
+        'Avenquis-Main',
     };
 
     if (token) {
       defaultHeaders.Authorization =
         `Bearer ${token}`;
+    }
+
+    try {
+      const stored = localStorage.getItem('avenquis_platform_session');
+      if (stored) {
+        const user = JSON.parse(stored);
+        if (user?.firmId) {
+          defaultHeaders['X-Firm-Id'] = String(user.firmId);
+        }
+      }
+    } catch {
+      // Ignore
     }
 
     const config: RequestInit = {

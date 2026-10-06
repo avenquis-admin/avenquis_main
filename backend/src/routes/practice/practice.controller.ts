@@ -1,6 +1,6 @@
-﻿import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { db } from "../../db";
-import { clients, engagements, firms, users } from "../../db/schema";
+import { clients, engagements, firms, users, engagementMembers, firmUsers } from "../../db/schema";
 import { eq, and } from "drizzle-orm";
 import { ApiError } from "../../middlewares/errorHandler";
 
@@ -200,6 +200,83 @@ export const restoreEngagement = async (req: Request, res: Response, next: NextF
     const [row] = await db.update(engagements).set({ isArchived: false, archivedAt: null, updatedAt: new Date() })
       .where(and(eq(engagements.id, engagementId), eq(engagements.firmId, firmId))).returning();
     if (!row) throw new ApiError(404, "NOT_FOUND", "Engagement not found");
+    res.json({ success: true, data: row });
+  } catch (error) { next(error); }
+};
+
+export const getEngagementTeam = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const firmId = req.firm!.id;
+    const engagementId = parseInt(req.params.id as string, 10);
+    
+    const [eng] = await db.select().from(engagements).where(and(eq(engagements.id, engagementId), eq(engagements.firmId, firmId)));
+    if (!eng) throw new ApiError(404, 'NOT_FOUND', 'Engagement not found');
+
+    const team = await db.select({
+      id: engagementMembers.id,
+      userId: engagementMembers.userId,
+      role: engagementMembers.role,
+      email: users.email
+    }).from(engagementMembers)
+      .innerJoin(users, eq(users.id, engagementMembers.userId))
+      .where(and(eq(engagementMembers.engagementId, engagementId), eq(engagementMembers.firmId, firmId)));
+    res.json({ success: true, data: team });
+  } catch (error) { next(error); }
+};
+
+export const addEngagementTeamMember = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const firmId = req.firm!.id;
+    const engagementId = parseInt(req.params.id as string, 10);
+    const { userId, role } = req.body;
+
+    if (!userId || !role) throw new ApiError(400, 'VALIDATION_ERROR', 'userId and role are required');
+
+    const [eng] = await db.select().from(engagements).where(and(eq(engagements.id, engagementId), eq(engagements.firmId, firmId)));
+    if (!eng) throw new ApiError(404, 'NOT_FOUND', 'Engagement not found');
+
+    const [member] = await db.select().from(firmUsers).where(and(eq(firmUsers.userId, Number(userId)), eq(firmUsers.firmId, firmId)));
+    if (!member) throw new ApiError(403, 'FORBIDDEN', 'User is not a member of this firm');
+
+    const [row] = await db.insert(engagementMembers).values({
+      firmId,
+      engagementId,
+      userId: Number(userId),
+      role
+    }).returning();
+    res.status(201).json({ success: true, data: row });
+  } catch (error) { next(error); }
+};
+
+export const removeEngagementTeamMember = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const firmId = req.firm!.id;
+    const engagementId = parseInt(req.params.id as string, 10);
+    const userId = parseInt(req.params.userId as string, 10);
+
+    const [eng] = await db.select().from(engagements).where(and(eq(engagements.id, engagementId), eq(engagements.firmId, firmId)));
+    if (!eng) throw new ApiError(404, 'NOT_FOUND', 'Engagement not found');
+
+    const [row] = await db.delete(engagementMembers).where(and(eq(engagementMembers.engagementId, engagementId), eq(engagementMembers.userId, userId), eq(engagementMembers.firmId, firmId))).returning();
+    res.json({ success: true, data: row || null });
+  } catch (error) { next(error); }
+};
+
+export const updateEngagementTeamMember = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const firmId = req.firm!.id;
+    const engagementId = parseInt(req.params.id as string, 10);
+    const userId = parseInt(req.params.userId as string, 10);
+    const { role } = req.body;
+
+    if (!role) throw new ApiError(400, 'VALIDATION_ERROR', 'role is required');
+
+    const [eng] = await db.select().from(engagements).where(and(eq(engagements.id, engagementId), eq(engagements.firmId, firmId)));
+    if (!eng) throw new ApiError(404, 'NOT_FOUND', 'Engagement not found');
+
+    const [row] = await db.update(engagementMembers).set({ role, updatedAt: new Date() })
+      .where(and(eq(engagementMembers.engagementId, engagementId), eq(engagementMembers.userId, userId), eq(engagementMembers.firmId, firmId))).returning();
+    if (!row) throw new ApiError(404, 'NOT_FOUND', 'Team member not found');
     res.json({ success: true, data: row });
   } catch (error) { next(error); }
 };

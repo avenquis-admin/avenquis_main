@@ -162,6 +162,13 @@
       "when": 1790978198001,
       "tag": "0022_firm_google_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791300311256,
+      "tag": "0023_complete_cloak",
+      "breakpoints": true
     }
   ]
 }
