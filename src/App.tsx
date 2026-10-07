@@ -12,7 +12,22 @@ function useCoreApi<T>(endpoint: string) {
     setLoading(true);
     apiClient.get(endpoint)
       .then((res: any) => {
-        if (res.data) setData(res.data);
+        if (res.data) {
+          const apiResponse = res.data;
+          if (apiResponse && typeof apiResponse === 'object') {
+            if (Array.isArray(apiResponse.data)) {
+              setData(apiResponse.data as T);
+            } else if (Array.isArray(apiResponse.items)) {
+              setData(apiResponse.items as T);
+            } else if (apiResponse.data !== undefined) {
+              setData(apiResponse.data as T);
+            } else {
+              setData(apiResponse as T);
+            }
+          } else {
+            setData(apiResponse as T);
+          }
+        }
       })
       .catch((err: any) => setError(err.message))
       .finally(() => setLoading(false));
@@ -85,10 +100,12 @@ function Logo({ light = false }: { light?: boolean }) {
 function Sidebar({ view, onNavigate }: { view: View; onNavigate: (view: View) => void }) {
   const [user, setUser] = useState<any>(null);
   useEffect(() => {
+    let unsub = () => {};
     import('./services/authService').then(({ authService }) => {
-      setUser(authService.getCurrentUser());
+      unsub = authService.subscribe((u) => setUser(u));
     });
-  }, [view]);
+    return () => unsub();
+  }, []);
   const handleLogout = async () => {
     const { authService } = await import('./services/authService');
     await authService.signOut();
@@ -96,17 +113,26 @@ function Sidebar({ view, onNavigate }: { view: View; onNavigate: (view: View) =>
   };
   return <aside className="sidebar">
     <div className="sidebar-top"><Logo light /><button className="mobile-close"><X size={18} /></button></div>
-    <button className="workspace-switch"><span className="workspace-icon">AO</span><span><strong>Avenquis Office</strong><small>Admin workspace</small></span><ChevronDown size={15} /></button>
+    <button className="workspace-switch"><span className="workspace-icon">{user?.firmName ? user.firmName.substring(0, 2).toUpperCase() : 'W'}</span><span><strong>{user?.firmName || 'Workspace'}</strong><small>{user?.role ? user.role.replace('_', ' ') : 'Member'}</small></span><ChevronDown size={15} /></button>
     <nav className="side-nav">
       {navGroups.map(group => <div className="nav-group" key={group.label}><div className="nav-label">{group.label}</div>{group.items.map(([label, Icon]) => <button className={`nav-item ${((view === 'dashboard' && label === 'Dashboard') || (view === 'people' && label === 'People & Staff') || (view === 'students' && label === 'Students / Articleship') || (view === 'engagement' && label === 'Client CRM') || (view === 'engagements' && label === 'Engagements & Teams') || (view === 'tasks' && label === 'Tasks & Deadlines') || (view === 'timesheets' && label === 'Timesheets') || (view === 'documents' && label === 'Document Vault') || (view === 'workingpapers' && label === 'Working Papers') || (view === 'review' && label === 'Review & Sign-offs') || (view === 'requests' && label === 'Client Requests') || (view === 'finance' && label === 'Office Finance') || (view === 'settings' && label === 'Settings')) ? 'active' : ''}`} onClick={() => label === 'People & Staff' ? onNavigate('people') : label === 'Students / Articleship' ? onNavigate('students') : label === 'Dashboard' ? onNavigate('dashboard') : label === 'Client CRM' ? onNavigate('engagement') : label === 'Engagements & Teams' ? onNavigate('engagements') : label === 'Tasks & Deadlines' ? onNavigate('tasks') : label === 'Timesheets' ? onNavigate('timesheets') : label === 'Document Vault' ? onNavigate('documents') : label === 'Working Papers' ? onNavigate('workingpapers') : label === 'Review & Sign-offs' ? onNavigate('review') : label === 'Client Requests' ? onNavigate('requests') : label === 'Office Finance' ? onNavigate('finance') : label === 'Settings' ? onNavigate('settings') : undefined} key={label}><Icon size={18} strokeWidth={1.7} /><span>{label}</span></button>)}</div>)}
     </nav>
-    <div className="sidebar-account"><div className="account-avatar">{user?.fullName?.charAt(0) || 'A'}</div><div><strong>{user?.fullName || 'Admin'}</strong><small>{user?.role || 'Administrator'}</small></div><ChevronDown size={14} /></div>
+    <div className="sidebar-account"><div className="account-avatar">{user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}</div><div><strong>{user?.fullName || 'User'}</strong><small>{user?.role ? user.role.replace('_', ' ') : 'Member'}</small></div><ChevronDown size={14} /></div>
     <button className="logout" onClick={handleLogout}><ArrowRight size={17} /><span>Logout</span></button>
   </aside>;
 }
 
 function TopBar({ onMenu, onCreate }: { onMenu: () => void; onCreate?: () => void }) {
-  return <header className="topbar"><button className="mobile-menu" onClick={onMenu}><Menu size={22} /></button><div className="top-actions"><div className="search-box"><Search size={16} /><input placeholder="Search anything..." /></div><button className="icon-button"><Bell size={18} /><i /></button><button className="create-button" onClick={onCreate}><Plus size={17} /> Create new <ChevronDown size={14} /></button><div className="mini-profile">AD</div><ChevronDown size={15} /></div></header>;
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    let unsub = () => {};
+    import('./services/authService').then(({ authService }) => {
+      unsub = authService.subscribe((u) => setUser(u));
+    });
+    return () => unsub();
+  }, []);
+  const initials = user?.fullName ? user.fullName.substring(0, 2).toUpperCase() : 'U';
+  return <header className="topbar"><button className="mobile-menu" onClick={onMenu}><Menu size={22} /></button><div className="top-actions"><div className="search-box"><Search size={16} /><input placeholder="Search anything..." /></div><button className="icon-button"><Bell size={18} /><i /></button><button className="create-button" onClick={onCreate}><Plus size={17} /> Create new <ChevronDown size={14} /></button><div className="mini-profile">{initials}</div><ChevronDown size={15} /></div></header>;
 }
 
 function StatCard({ icon: Icon, title, value, change, tone }: { icon: IconType; title: string; value: string; change: string; tone: string }) {
@@ -114,7 +140,16 @@ function StatCard({ icon: Icon, title, value, change, tone }: { icon: IconType; 
 }
 
 function Dashboard({ onPeople, onMenu }: { onPeople: () => void; onMenu: () => void }) {
-  return <><TopBar onMenu={onMenu} /><main className="page-content"><div className="page-heading"><div><div className="eyebrow-date">MONDAY, 12 OCTOBER 2026</div><h1>Good morning, Admin.</h1><p>Here's what's happening across your workspace today.</p></div></div>
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    let unsub = () => {};
+    import('./services/authService').then(({ authService }) => {
+      unsub = authService.subscribe((u) => setUser(u));
+    });
+    return () => unsub();
+  }, []);
+
+  return <><TopBar onMenu={onMenu} /><main className="page-content"><div className="page-heading"><div><div className="eyebrow-date">MONDAY, 12 OCTOBER 2026</div><h1>Good morning{user?.fullName ? `, ${user.fullName.split(/[, ]+/)[0]}` : ''}.</h1><p>Here's what's happening across your workspace today.</p></div></div>
     <section className="hero-grid"><div className="workspace-hero"><div className="eyebrow">YOUR WORKSPACE</div><h2>Everything in<br /><i>one place.</i></h2><p>Keep your team aligned, your work moving, and<br />your office growing.</p><button onClick={onPeople}>Explore workspace <ArrowRight size={18} /></button><div className="hero-art"><div className="art-card art-card-main"><BarChart3 size={35} /></div><div className="art-card art-card-small"><Users size={22} /></div><span className="art-line line-one" /><span className="art-line line-two" /><span className="art-line line-three" /></div></div><div className="team-chart"><div><div className="eyebrow">TEAM MEMBERS</div><strong>128</strong><small><TrendingUp size={13} /> <b>12%</b> vs last month</small></div><div className="bars">{[22,31,36,45,56,49,63,58,70,82].map((height, i) => <div className="bar-wrap" key={i}><span style={{ height: `${height}%` }} className={i === 1 || i === 3 || i === 7 ? 'gold-bar' : ''} /><small>{['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'][i]}</small></div>)}</div><div className="team-mini"><div><UsersRound size={16} /> Present Today <b>106</b></div><div><UserRound size={16} /> On Leave <b className="red-text">8</b></div><div><UserRound size={16} /> Available <b>14</b></div><div><UserRound size={16} /> New This Month <b className="gold-text">5</b></div></div></div></section>
     <section className="quick-section"><div className="section-title"><h3>Quick overview</h3><button>Last 30 days <ChevronDown size={14} /></button></div><div className="quick-grid"><Quick title="Pending approvals" value="08" icon={Clock3} tone="gold" /><Quick title="Open tasks" value="24" icon={Clock3} tone="blue" /><Quick title="Overdue tasks" value="06" icon={ShieldCheck} tone="red" /><Quick title="Upcoming deadlines" value="12" icon={CalendarDays} tone="violet" /><Quick title="Monthly revenue" value="৳ 4.28M" icon={BarChart3} tone="green" /><Quick title="Outstanding receivable" value="৳ 12.56M" icon={CircleDollarSign} tone="gold" /></div></section>
     <section className="lower-grid"><Engagements /><TodaysTasks /></section><section className="bottom-grid"><Utilization /><FinanceSnapshot /><PendingRequests /><RecentActivity /></section>
@@ -470,10 +505,10 @@ function CreateModal({ type, onClose }: { type: string; onClose: () => void }) {
         body = { invoiceNumber: val, clientId: 1, amount: 1000, status: 'DRAFT', issueDate: new Date().toISOString(), dueDate: new Date().toISOString() };
       } else if (type === 'staff') {
         endpoint = '/people';
-        body = { fullName: val, email: val.replace(' ', '')+'@firm.com', type: 'STAFF', designation: 'Associate' };
+        body = { fullName: val, email: val.replace(' ', '')+'@example.com', type: 'STAFF', designation: 'Associate' };
       } else if (type === 'student') {
         endpoint = '/people';
-        body = { fullName: val, email: val.replace(' ', '')+'@firm.com', type: 'STUDENT', designation: 'Articleship' };
+        body = { fullName: val, email: val.replace(' ', '')+'@example.com', type: 'STUDENT', designation: 'Articleship' };
       }
 
       if (type === 'document') {
@@ -539,35 +574,14 @@ function Chatbot() {
     setLoading(true);
 
     try {
-      type ChatbotAssistBody = {
-        success: boolean;
-        data: {
-          output: string;
-          providerMode?: string;
-          model?: string | null;
-          usageClass?: string;
-          creditsCharged?: number;
-        };
-      };
-
-      const response = await apiClient.post<ChatbotAssistBody>('/ai/assist', {
-        prompt: userMessage,
-        idempotencyKey: Math.random().toString(36).substring(7) + Date.now().toString(36),
-        context: {}
-      });
-
-      const output = response.data?.data?.output;
-      if (response.ok && output) {
-        setMessages(prev => [...prev, { role: 'assistant', content: output }]);
-      } else {
-        throw new Error('Invalid response');
-      }
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: 'The AI response service is temporarily unavailable in the core workspace.'
+        }]);
+        setLoading(false);
+      }, 500);
     } catch (error) {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'The AI response service is temporarily unavailable. I can still help with supported Avenquis platform questions.'
-      }]);
-    } finally {
       setLoading(false);
     }
   };
@@ -665,3 +679,4 @@ function Chatbot() {
 }
 
 export default App;
+

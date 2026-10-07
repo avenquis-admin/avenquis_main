@@ -30,9 +30,10 @@ async function provision(email: string, firm = false) {
   const id = created.body.data.id;
   const approved = await request(app).post(`/api/v1/control/access-requests/${id}/review`).set("Authorization", `Bearer ${controlToken}`).send({ decision: "approved", actor: "X4 Test Admin", actorId: "x4-admin", actorPlatformRole: "PLATFORM_ADMIN", reason: "X4 fixture provisioning", assignedRole: firm ? "FIRM_OWNER" : "STAFF", correlationId: `x4-provision-${id}` });
   expect(approved.status).toBe(200);
-  const rawToken = getMemoryEmailMessagesForTests().at(-1)?.text.match(/\/activate\?token=([^\s]+)/)?.[1];
-  await request(app).post("/api/v1/auth/activate").send({ token: decodeURIComponent(rawToken!), password, confirmPassword: password });
-  const login = await request(app).post("/api/v1/auth/login").send({ email, password });
+  const tempPassword = getMemoryEmailMessagesForTests().at(-1)?.text.match(/Temporary password: (.+)/)?.[1]?.trim();
+  const login = await request(app).post("/api/v1/auth/login").send({ email, password: tempPassword });
+  const cookieStr = login.headers["set-cookie"][0].split(";")[0];
+  await request(app).post("/api/v1/auth/change-initial-password").set("Cookie", cookieStr).send({ currentPassword: tempPassword, newPassword: password });
   const [wallet] = await db.select().from(creditWallets).where(eq(creditWallets.accessRequestId, id));
   return { wallet, cookie: login.headers["set-cookie"][0].split(";")[0], firmId: wallet.firmId };
 }

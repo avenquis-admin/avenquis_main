@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Avenquis Control Panel - Auth Context & Route Guard Provider
  */
 
@@ -9,7 +9,7 @@ import { authService, LoginCredentials, AuthResult } from '../services/authServi
 interface AuthContextType {
   user: AdminUser | null;
   isAuthenticated: boolean;
-  isPlatformSuperAdmin: boolean;
+  
   isLoading: boolean;
   signIn: (credentials?: Partial<LoginCredentials>) => Promise<AuthResult>;
   signOut: () => Promise<void>;
@@ -59,14 +59,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAuthenticated = !!user && new Date(user.sessionExpiresAt).getTime() > Date.now();
-  const isPlatformSuperAdmin = user?.role === 'PLATFORM_SUPER_ADMIN';
+  
 
   return (
     <AuthContext.Provider
       value={{
         user,
         isAuthenticated,
-        isPlatformSuperAdmin,
+        
         isLoading,
         signIn,
         signOut,
@@ -85,3 +85,4 @@ export function useAuth(): AuthContextType {
   }
   return context;
 }
+

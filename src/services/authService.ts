@@ -2,13 +2,13 @@ import { AdminUser } from '../types';
 import { apiClient } from './apiClient';
 
 const AUTH_STORAGE_KEY =
-  'avenquis_platform_session';
+  'avenquis_tenant_session';
 
 const TOKEN_KEY =
-  'avenquis_platform_token';
+  'avenquis_tenant_token';
 
 const REMEMBER_ME_KEY =
-  'avenquis_platform_remember_me';
+  'avenquis_tenant_remember_me';
 
 export interface LoginCredentials {
   email: string;
@@ -126,12 +126,7 @@ class AuthService {
     return Boolean(this.currentUser);
   }
 
-  public isPlatformSuperAdmin() {
-    return (
-      this.currentUser?.role ===
-      'PLATFORM_SUPER_ADMIN'
-    );
-  }
+  
 
   public async signIn(
     credentials?: Partial<LoginCredentials>,
@@ -274,3 +269,4 @@ class AuthService {
 
 export const authService =
   new AuthService();
+

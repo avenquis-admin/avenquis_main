@@ -1,10 +1,10 @@
-﻿/**
+/**
  * Avenquis Control Panel - Core TypeScript Definitions
  * Strict enterprise platform types
  */
 
 export type PlatformRole =
-  | 'PLATFORM_SUPER_ADMIN'
+  
   | 'PLATFORM_OPERATOR'
   | 'PLATFORM_AUDITOR';
 
@@ -473,15 +473,7 @@ export interface NotificationSettings {
   enableSmsP1Alerts: boolean;
 }
 
-export interface SuperAdminUser {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  fido2Registered: boolean;
-  lastActive: string;
-  status: 'Active' | 'Suspended';
-}
+
 
 export interface PlatformMaintenanceConfig {
   active: boolean;
@@ -495,7 +487,7 @@ export interface PlatformSettings {
   security?: SecuritySettings;
   gateways?: GatewaySettings;
   notifications?: NotificationSettings;
-  superAdmins?: SuperAdminUser[];
+  
   maintenance?: PlatformMaintenanceConfig;
 }
 
@@ -556,3 +548,4 @@ export interface AssistantChatMessage {
   sources?: Array<{ label: string; count?: number; path?: string; id?: string }>;
   isAiGenerated?: boolean;
 }
+

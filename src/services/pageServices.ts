@@ -35,7 +35,7 @@ import {
   SecuritySettings,
   GatewaySettings,
   NotificationSettings,
-  SuperAdminUser,
+  
   PlatformMaintenanceConfig,
   PlatformSettings,
   AssistantChatMessage,
@@ -50,106 +50,11 @@ export interface DataFetchResult<T> {
   timestamp: string;
 }
 
-export const DEFAULT_MOCK_METRICS: MetricItem[] = [
-  { id: 'm1', label: 'Total Firms', value: 10, change: '+8.4%', trend: 'up', timeframe: 'vs last 30d', sublabel: '9 active', targetPath: '/firms' },
-  { id: 'm2', label: 'Active Firms', value: 9, change: '+5.2%', trend: 'up', timeframe: 'vs last 30d', sublabel: '90% retention', targetPath: '/firms' },
-  { id: 'm3', label: 'Total Users', value: 1148, change: '+14.2%', trend: 'up', timeframe: 'vs last 30d', sublabel: 'Active practitioners', targetPath: '/users' },
-  { id: 'm4', label: 'Pending Access Requests', value: 4, change: '+4', trend: 'down', timeframe: 'Requires audit review', sublabel: 'Accreditation queue', targetPath: '/access-requests' },
-  { id: 'm5', label: 'Pending Approvals', value: 3, change: '-2', trend: 'neutral', timeframe: 'AI Governance', sublabel: 'Awaiting human sign-off', targetPath: '/ai/approvals' },
-  { id: 'm6', label: 'Monthly Subscription Value', value: 'à§³50.3 Lakhs', change: '+12.5%', trend: 'up', timeframe: 'vs last 30d', sublabel: 'Recurring platform revenue', targetPath: '/billing' },
-  { id: 'm7', label: 'Overdue Collections', value: 'à§³65k', change: '-4.1%', trend: 'down', timeframe: 'Collections queue', sublabel: '1 firm past due', targetPath: '/billing' },
-  { id: 'm8', label: 'Open Support Issues', value: 3, change: '-25%', trend: 'down', timeframe: 'SLA < 15 min', sublabel: 'SRE priority queue', targetPath: '/support' },
-];
+export const DEFAULT_METRICS: any[] = [];
 
-export const DEFAULT_SYSTEM_SERVICES: SystemServiceStatus[] = [
-  { name: 'Core API Gateway', status: 'healthy', latency: '24ms', region: 'ap-south-1 (Mumbai / Dhaka Edge)' },
-  { name: 'PostgreSQL Database Tier', status: 'healthy', latency: '12ms', region: 'ap-south-1 (Primary HA Cluster)' },
-  { name: 'Neon PostgreSQL & Auth Tier', status: 'healthy', latency: '18ms', region: 'configured region' },
-  { name: 'AI Sovereign Reasoning Engine', status: 'healthy', latency: '110ms', region: 'ap-south-1 (Air-Gapped Sovereign Node)' },
-  { name: 'Document OCR & Ingestion Pipeline', status: 'healthy', latency: '45ms', region: 'ap-south-1 (Batch Processing Worker)' },
-  { name: 'Audit Cryptographic Stream', status: 'healthy', latency: '15ms', region: 'ap-south-1 (Immutable Ledger)' },
-];
+export const DEFAULT_SYSTEM_SERVICES: any[] = [];
 
-export const DEFAULT_SUPPORT_TICKETS: SupportTicket[] = [
-  {
-    id: 'tkt-001',
-    ticketNumber: 'TKT-8841',
-    firmName: 'A. Qasem & Co. Chartered Accountants',
-    firm: 'A. Qasem & Co. Chartered Accountants',
-    contact: 'Demo Firm Administrator',
-    contactEmail: 'firm.admin@example.test',
-    subject: 'SSO SAML 2.0 configuration for audit team active directory',
-    priority: 'High',
-    status: 'In Progress',
-    category: 'Authentication & SSO',
-    assignedTo: 'Identity Engineering',
-    assignee: 'Identity Engineering',
-    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    lastUpdated: new Date(Date.now() - 1800000).toISOString(),
-    updatedAt: new Date(Date.now() - 1800000).toISOString(),
-    messages: [
-      {
-        sender: 'Demo Firm Administrator',
-        role: 'Firm Administrator',
-        content: 'Active Directory certificate renewal scheduled for tomorrow. Please verify metadata exchange endpoint.',
-        timestamp: new Date(Date.now() - 3600000 * 4).toISOString(),
-      },
-    ],
-    internalNotes: [
-      {
-        id: 'note-1',
-        author: 'Identity Engineering',
-        note: 'Metadata exchanged and cert validation completed.',
-        timestamp: new Date(Date.now() - 1800000).toISOString(),
-      },
-    ],
-  },
-  {
-    id: 'tkt-002',
-    ticketNumber: 'TKT-8839',
-    firmName: 'A. Hoque & Co. Chartered Accountants',
-    firm: 'A. Hoque & Co. Chartered Accountants',
-    contact: 'Demo Audit Partner',
-    contactEmail: 'audit.partner@example.test',
-    subject: 'IFRS 16 lease schedule calculation verification discrepancy',
-    priority: 'High',
-    status: 'Open',
-    category: 'Accounting Standards',
-    assignedTo: 'Audit Tech Engineering',
-    assignee: 'Audit Tech Engineering',
-    createdAt: new Date(Date.now() - 3600000 * 18).toISOString(),
-    lastUpdated: new Date(Date.now() - 3600000 * 2).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    messages: [
-      {
-        sender: 'Demo Audit Partner',
-        role: 'Audit Partner',
-        content: 'Lease liability amortization schedule rounding error identified in banking client audit working papers.',
-        timestamp: new Date(Date.now() - 3600000 * 18).toISOString(),
-      },
-    ],
-    internalNotes: [],
-  },
-  {
-    id: 'tkt-003',
-    ticketNumber: 'TKT-8827',
-    firmName: 'A. B. Saha & Co. Chartered Accountants',
-    firm: 'A. B. Saha & Co. Chartered Accountants',
-    contact: 'Demo Managing Partner',
-    contactEmail: 'managing.partner@example.test',
-    subject: 'Custom audit sampling template validation for banking client',
-    priority: 'Low',
-    status: 'Resolved',
-    category: 'Sampling & Workpapers',
-    assignedTo: 'Audit AI Specialists',
-    assignee: 'Audit AI Specialists',
-    createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
-    lastUpdated: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString(),
-    messages: [],
-    internalNotes: [],
-  },
-];
+export const DEFAULT_SUPPORT_TICKETS: any[] = [];
 
 export const DEFAULT_AUDIT_EVENTS: AuditEvent[] = [
   {
@@ -158,7 +63,7 @@ export const DEFAULT_AUDIT_EVENTS: AuditEvent[] = [
     actor: 'admin@avenquis.internal',
     actorEmail: 'admin@avenquis.internal',
     actorType: 'Platform Super Admin',
-    actorRole: 'PLATFORM_SUPER_ADMIN',
+    actorRole: undefined,
     action: 'FIRM_TENANCY_STATUS_CHANGE',
     target: 'S. Gupta & Co. Chartered Accountants',
     targetEntity: 'sgupta.avenquis.com',
@@ -188,7 +93,7 @@ export const DEFAULT_AUDIT_EVENTS: AuditEvent[] = [
     actor: 'Platform Super Admin',
     actorEmail: 'admin@avenquis.internal',
     actorType: 'Platform Super Admin',
-    actorRole: 'PLATFORM_SUPER_ADMIN',
+    actorRole: undefined,
     action: 'ROLE_ASSIGNMENT',
     target: 'Demo Firm Administrator (A. Qasem & Co.)',
     targetEntity: 'Role: FIRM_ADMIN',
@@ -363,13 +268,7 @@ export const overviewService = {
    * STRICTLY NO MOCK FALLBACK: Fails fast with typed ApiError if backend is unreachable or missing.
    */
   async getMetrics(timeRange = '30d', signal?: AbortSignal): Promise<DataFetchResult<MetricItem[]>> {
-    if (getDataMode() === 'mock') {
-      return {
-        data: DEFAULT_MOCK_METRICS,
-        isMock: true,
-        timestamp: new Date().toISOString(),
-      };
-    }
+    
 
     const res = await apiClient.get<MetricItem[] | { metrics: MetricItem[] }>('/overview/metrics', {
       params: { range: timeRange },
@@ -398,13 +297,7 @@ export const overviewService = {
    * Fetches real-time multi-region infrastructure and gateway health statuses.
    */
   async getSystemStatus(signal?: AbortSignal): Promise<DataFetchResult<SystemServiceStatus[]>> {
-    if (getDataMode() === 'mock') {
-      return {
-        data: DEFAULT_SYSTEM_SERVICES,
-        isMock: true,
-        timestamp: new Date().toISOString(),
-      };
-    }
+    
 
     const res = await apiClient.get<SystemServiceStatus[]>('/overview/system-status', {
       signal,
@@ -425,13 +318,7 @@ export const overviewService = {
    * Fetches recent access requests queue for dashboard snapshot.
    */
   async getRecentAccessRequests(signal?: AbortSignal): Promise<DataFetchResult<AccessRequest[]>> {
-    if (getDataMode() === 'mock') {
-      return {
-        data: [],
-        isMock: true,
-        timestamp: new Date().toISOString(),
-      };
-    }
+    
 
     const res = await apiClient.get<AccessRequest[] | { requests: AccessRequest[] }>('/overview/recent-access-requests', { signal });
     if (res.ok && res.data) {
@@ -463,29 +350,6 @@ export const overviewService = {
   },
 
   /**
-   * Fetches billing collections and receivables for dashboard snapshot.
-   * STRICTLY NO MOCK FALLBACK.
-   */
-  async getCollections(signal?: AbortSignal): Promise<DataFetchResult<CollectionRecord[]>> {
-    const res = await apiClient.get<CollectionRecord[] | { collections: CollectionRecord[] } | { data: CollectionRecord[] }>(
-      '/billing/collections',
-      { signal }
-    );
-    if (res.ok && res.data) {
-      let data: any[] = [];
-      if (Array.isArray(res.data)) {
-        data = res.data;
-      } else if (typeof res.data === 'object' && res.data && 'collections' in res.data && Array.isArray((res.data as any).collections)) {
-        data = (res.data as any).collections;
-      } else if (typeof res.data === 'object' && res.data && 'data' in res.data && Array.isArray((res.data as any).data)) {
-        data = (res.data as any).data;
-      }
-      return { data: data.map(normalizeCollectionRecord), isMock: false, timestamp: new Date().toISOString() };
-    }
-    throw new Error('Invalid collections response structure received from Backend');
-  },
-
-  /**
    * Fetches priority support tickets for dashboard snapshot.
    */
   async getSupportTickets(signal?: AbortSignal): Promise<DataFetchResult<SupportTicket[]>> {
@@ -511,29 +375,6 @@ export const overviewService = {
       }
     }
     return { data: DEFAULT_SUPPORT_TICKETS, isMock: true, timestamp: new Date().toISOString() };
-  },
-
-  /**
-   * Fetches pending AI governance approvals for dashboard snapshot.
-   * STRICTLY NO MOCK FALLBACK.
-   */
-  async getPendingApprovals(signal?: AbortSignal): Promise<DataFetchResult<AIApproval[]>> {
-    const res = await apiClient.get<AIApproval[] | { approvals: AIApproval[] } | { data: AIApproval[] }>(
-      '/ai/approvals',
-      { signal }
-    );
-    if (res.ok && res.data) {
-      let data: any[] = [];
-      if (Array.isArray(res.data)) {
-        data = res.data;
-      } else if (typeof res.data === 'object' && res.data && 'approvals' in res.data && Array.isArray((res.data as any).approvals)) {
-        data = (res.data as any).approvals;
-      } else if (typeof res.data === 'object' && res.data && 'data' in res.data && Array.isArray((res.data as any).data)) {
-        data = (res.data as any).data;
-      }
-      return { data: data.map(normalizeAIApproval), isMock: false, timestamp: new Date().toISOString() };
-    }
-    throw new Error('Invalid AI approvals response structure received from Backend');
   },
 
   /**
@@ -1400,28 +1241,6 @@ export const plansService = {
     }
     throw new Error('Backend failed to create plan variant');
   },
-
-  /**
-   * Retrieves active subscriptions summary: GET /billing/subscriptions
-   */
-  async getSubscriptionsSummary(signal?: AbortSignal): Promise<DataFetchResult<SubscriptionSummaryRecord[]>> {
-    const res = await apiClient.get<SubscriptionSummaryRecord[] | { subscriptions: SubscriptionSummaryRecord[] } | { data: SubscriptionSummaryRecord[] }>(
-      '/billing/subscriptions',
-      { signal }
-    );
-    if (res.ok && res.data) {
-      let data: SubscriptionSummaryRecord[] = [];
-      if (Array.isArray(res.data)) {
-        data = res.data;
-      } else if (typeof res.data === 'object' && 'subscriptions' in res.data && Array.isArray((res.data as any).subscriptions)) {
-        data = (res.data as any).subscriptions;
-      } else if (typeof res.data === 'object' && 'data' in res.data && Array.isArray((res.data as any).data)) {
-        data = (res.data as any).data;
-      }
-      return { data, isMock: false, timestamp: new Date().toISOString() };
-    }
-    throw new Error('Authoritative backend failed to fetch subscriptions summary');
-  },
 };
 
 // 7. Billing Service
@@ -1473,32 +1292,6 @@ export const billingService = {
   },
 
   /**
-   * Retrieves collections ledger: GET /billing/collections
-   * ZERO-MOCK ENFORCED.
-   */
-  async getCollections(
-    params?: { search?: string; status?: string; page?: number; limit?: number },
-    signal?: AbortSignal
-  ): Promise<DataFetchResult<CollectionRecord[]>> {
-    const res = await apiClient.get<CollectionRecord[] | { collections: CollectionRecord[] } | { data: CollectionRecord[] }>(
-      '/billing/collections',
-      { params, signal }
-    );
-    if (res.ok && res.data) {
-      let data: CollectionRecord[] = [];
-      if (Array.isArray(res.data)) {
-        data = res.data;
-      } else if (typeof res.data === 'object' && 'collections' in res.data && Array.isArray((res.data as any).collections)) {
-        data = (res.data as any).collections;
-      } else if (typeof res.data === 'object' && 'data' in res.data && Array.isArray((res.data as any).data)) {
-        data = (res.data as any).data;
-      }
-      return { data, isMock: false, timestamp: new Date().toISOString() };
-    }
-    throw new Error('Authoritative backend failed to fetch collections ledger');
-  },
-
-  /**
    * Retrieves payment gateways telemetry: GET /billing/gateways
    * ZERO-MOCK ENFORCED.
    */
@@ -1519,54 +1312,6 @@ export const billingService = {
       return { data, isMock: false, timestamp: new Date().toISOString() };
     }
     throw new Error('Authoritative backend failed to fetch payment gateways');
-  },
-
-  /**
-   * Dispatches formal collection reminder: POST /billing/collections/:id/remind
-   */
-  async sendCollectionReminder(id: string, payload?: { auditReason?: string }): Promise<any> {
-    const res = await apiClient.post(`/billing/collections/${encodeURIComponent(id)}/remind`, payload);
-    if (res.ok) {
-      return res.data;
-    }
-    throw new Error(`Backend failed to dispatch reminder for collection ${id}`);
-  },
-
-  /**
-   * Records collection audit note: POST /billing/collections/:id/notes
-   */
-  async logCollectionNote(id: string, note: string, auditReason?: string): Promise<any> {
-    const res = await apiClient.post(`/billing/collections/${encodeURIComponent(id)}/notes`, {
-      text: note,
-      auditReason,
-    });
-    if (res.ok) {
-      return res.data;
-    }
-    throw new Error(`Backend failed to record note for collection ${id}`);
-  },
-
-  /**
-   * Marks collection as settled: POST /billing/collections/:id/settle
-   * STRICTLY REAL BACKEND ACTION â€” ZERO SIMULATED PAYMENT.
-   */
-  async markCollectionPaid(id: string, payload?: { auditReason?: string }): Promise<any> {
-    const res = await apiClient.post(`/billing/collections/${encodeURIComponent(id)}/settle`, payload);
-    if (res.ok) {
-      return res.data;
-    }
-    throw new Error(`Backend failed to record settlement for collection ${id}`);
-  },
-
-  /**
-   * Escalates collection delinquency: POST /billing/collections/:id/escalate
-   */
-  async escalateCollection(id: string, payload?: { auditReason?: string; reason?: string }): Promise<any> {
-    const res = await apiClient.post(`/billing/collections/${encodeURIComponent(id)}/escalate`, payload);
-    if (res.ok) {
-      return res.data;
-    }
-    throw new Error(`Backend failed to escalate collection ${id}`);
   },
 
   /**
@@ -2063,44 +1808,6 @@ export const aiService = {
   },
 
   /**
-   * Fetches human-in-the-loop pending approval gates.
-   */
-  async getApprovals(signal?: AbortSignal): Promise<DataFetchResult<AIApproval[]>> {
-    const res = await apiClient.get<AIApproval[] | { approvals: AIApproval[] }>('/ai/approvals', { signal });
-    if (res.ok && res.data) {
-      const items = Array.isArray(res.data) ? res.data : (res.data as { approvals: AIApproval[] }).approvals || [];
-      return { data: items, isMock: false, timestamp: new Date().toISOString() };
-    }
-    throw new Error('Invalid AI approvals response received from Backend');
-  },
-
-  /**
-   * Submits decision (Approved/Rejected) on human-in-the-loop approval gate.
-   */
-  async decideApproval(
-    id: string,
-    status: 'Approved' | 'Rejected',
-    note?: string,
-    auditReason?: string
-  ): Promise<boolean> {
-    const res = await apiClient.post<{ success: boolean }>(`/ai/approvals/${id}/decide`, {
-      status,
-      decisionNote: note,
-      auditReason: auditReason || note || `Super admin decided approval [${id}] as ${status}`,
-    });
-    if (res.ok) return true;
-    throw new Error(`Authoritative backend failed to record approval decision for ${id}`);
-  },
-
-  async approveApproval(id: string, note?: string, auditReason?: string): Promise<boolean> {
-    return this.decideApproval(id, 'Approved', note, auditReason);
-  },
-
-  async rejectApproval(id: string, note?: string, auditReason?: string): Promise<boolean> {
-    return this.decideApproval(id, 'Rejected', note, auditReason);
-  },
-
-  /**
    * Fetches governance and safety guardrail policies.
    */
   async getPolicies(signal?: AbortSignal): Promise<DataFetchResult<AIPolicy[]>> {
@@ -2491,46 +2198,6 @@ export const settingsService = {
       return res.data;
     }
     throw new Error('Authoritative backend failed to persist notification settings');
-  },
-
-  /**
-   * Fetches active platform super administrators.
-   */
-  async getSuperAdmins(signal?: AbortSignal): Promise<DataFetchResult<SuperAdminUser[]>> {
-    const res = await apiClient.get<SuperAdminUser[] | { admins: SuperAdminUser[] }>('/settings/admins', { signal });
-    if (res.ok && res.data) {
-      const items = Array.isArray(res.data) ? res.data : (res.data as { admins: SuperAdminUser[] }).admins || [];
-      return { data: items, isMock: false, timestamp: new Date().toISOString() };
-    }
-    throw new Error('Invalid super admins response received from Backend');
-  },
-
-  /**
-   * Invites new Super Admin identity.
-   */
-  async inviteSuperAdmin(
-    payload: { name: string; email: string; role?: string },
-    auditReason?: string
-  ): Promise<SuperAdminUser> {
-    const res = await apiClient.post<SuperAdminUser>('/settings/admins', {
-      ...payload,
-      auditReason: auditReason || `Super admin invite dispatched for ${payload.email}`,
-    });
-    if (res.ok && res.data) {
-      return res.data;
-    }
-    throw new Error('Authoritative backend failed to invite super admin');
-  },
-
-  /**
-   * Revokes Super Admin privileges.
-   */
-  async revokeSuperAdmin(id: string, auditReason?: string): Promise<boolean> {
-    const res = await apiClient.delete<{ success: boolean }>(`/settings/admins/${id}`, {
-      body: JSON.stringify({ auditReason: auditReason || `Super admin access revoked for ${id}` }),
-    });
-    if (res.ok) return true;
-    throw new Error(`Authoritative backend failed to revoke super admin ${id}`);
   },
 
   /**

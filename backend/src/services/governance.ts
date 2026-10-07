@@ -1,4 +1,4 @@
-﻿import { and, asc, count, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { firmUsers, firms, platformSubscriptions, users } from "../db/schema";
 import { ApiError } from "../middlewares/errorHandler";
@@ -107,6 +107,12 @@ export async function transitionFirm(firmId: number, transition: "activate" | "s
     if (current.status !== expected) throw new ApiError(409, "FIRM_STATE_CONFLICT", `Firm cannot ${transition} from '${current.status}' state.`);
     const [updated] = await tx.update(firms).set({ status: target, updatedAt: new Date() }).where(and(eq(firms.id, firmId), eq(firms.status, expected))).returning();
     if (!updated) throw new ApiError(409, "FIRM_STATE_CONFLICT", "Firm state changed concurrently.");
+    
+    const now = new Date();
+    await tx.update(platformSubscriptions).set({ status: target === "active" ? "Active" : "Suspended", updatedAt: now }).where(eq(platformSubscriptions.firmId, firmId));
+    await tx.execute(sql`UPDATE firm_subscriptions SET subscription_status = ${target}, updated_at = ${now.toISOString()} WHERE firm_id = ${firmId}`);
+    await tx.execute(sql`UPDATE firm_entitlements SET subscription_status = ${target}, updated_at = ${now.toISOString()} WHERE firm_id = ${firmId}`);
+
     await insertAudit(tx, input, transition === "suspend" ? "FIRM_SUSPENDED" : transition === "activate" ? "FIRM_ACTIVATED" : "FIRM_REACTIVATED", { targetFirmId: String(firmId), previousState: current.status, newState: updated.status }, transition === "suspend" ? "warning" : "info");
     const [[members], [subscription]] = await Promise.all([
       tx.select({ value: count() }).from(firmUsers).where(and(eq(firmUsers.firmId, updated.id), eq(firmUsers.status, "active"))),

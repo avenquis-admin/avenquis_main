@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Avenquis Control Panel - Robust Single-Page Routing System
  * Supports full path matching, browser pushState / popstate history sync, query params,
- * active link detection, and PLATFORM_SUPER_ADMIN route guarding.
+ * active link detection, and route guarding.
  */
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
@@ -141,3 +141,4 @@ export function useRouter(): RouterContextType {
   }
   return context;
 }
+

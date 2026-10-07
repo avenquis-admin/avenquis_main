@@ -1,4 +1,4 @@
-﻿import bcrypt from "bcrypt";
+import bcrypt from "bcrypt";
 import { afterAll, describe, expect, it } from "vitest";
 import request from "supertest";
 import { eq, sql } from "drizzle-orm";
@@ -65,9 +65,13 @@ async function provisionAndActivate(email: string, firm: boolean) {
     .set("Authorization", `Bearer ${controlToken}`)
     .send({ decision: "approved", actor: "X3 Test Admin", actorId: "x3-admin", actorPlatformRole: "PLATFORM_ADMIN", reason: "X3 ledger verification", assignedRole: firm ? "FIRM_OWNER" : "STAFF", correlationId: `x3-provision-${requestId}` });
   expect(approved.status).toBe(200);
-  const rawToken = getMemoryEmailMessagesForTests().at(-1)?.text.match(/\/activate\?token=([^\s]+)/)?.[1];
-  expect(rawToken).toBeTruthy();
-  const activated = await request(app).post("/api/v1/auth/activate").send({ token: decodeURIComponent(rawToken!), password, confirmPassword: password });
+  const match = getMemoryEmailMessagesForTests().at(-1)?.text.match(/Temporary password: (.+)/);
+  expect(match).toBeTruthy();
+  const tempPassword = match[1].trim();
+  const loginRes = await request(app).post("/api/v1/auth/login").send({ email, password: tempPassword });
+  expect(loginRes.status).toBe(200);
+  const cookie = loginRes.headers["set-cookie"][0].split(";")[0];
+  const activated = await request(app).post("/api/v1/auth/change-initial-password").set("Cookie", cookie).send({ currentPassword: tempPassword, newPassword: password });
   expect(activated.status).toBe(200);
   const [user] = await db.select().from(users).where(eq(users.provisioningRequestId, requestId));
   const [wallet] = await db.select().from(creditWallets).where(eq(creditWallets.accessRequestId, requestId));
@@ -149,3 +153,4 @@ describe("Phase X3 subscription, wallet, and credit ledger", () => {
     expect((await db.select().from(creditLedger).where(eq(creditLedger.idempotencyKey, body.idempotencyKey)))).toHaveLength(1);
   });
 });
+

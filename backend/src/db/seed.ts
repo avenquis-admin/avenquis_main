@@ -1,4 +1,4 @@
-﻿import { db, pool } from "./index";
+import { db, pool } from "./index";
 import { users, firms, firmUsers, peopleProfiles } from "./schema";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
@@ -9,78 +9,63 @@ async function seed() {
     process.exit(1);
   }
 
-  console.log("Seeding development data for B03...");
+  console.log("Seeding development data for B03 with authoritative FAMES & R ICAB mapping...");
   try {
     const passwordHash = await bcrypt.hash("password123", 10);
 
-    // Platform admin removed - Core is tenant only
-
-    const [user1] = await db.insert(users).values({
-      email: "user1@firm1.com",
-      passwordHash,
-    }).onConflictDoUpdate({ target: users.email, set: { email: "user1@firm1.com" } }).returning();
-
-    const [user2] = await db.insert(users).values({
-      email: "user2@firm2.com",
-      passwordHash,
-    }).onConflictDoUpdate({ target: users.email, set: { email: "user2@firm2.com" } }).returning();
-
-    const [staff1] = await db.insert(users).values({
-      email: "staff1@firm1.com",
-      passwordHash,
-    }).onConflictDoUpdate({ target: users.email, set: { email: "staff1@firm1.com" } }).returning();
-
-    const [manager1] = await db.insert(users).values({
-      email: "manager1@firm1.com",
-      passwordHash,
-    }).onConflictDoUpdate({ target: users.email, set: { email: "manager1@firm1.com" } }).returning();
-
-    const [student1] = await db.insert(users).values({
-      email: "student1@firm1.com",
-      passwordHash,
-    }).onConflictDoUpdate({ target: users.email, set: { email: "student1@firm1.com" } }).returning();
-
-    // Create firms
-    const [firm1] = await db.insert(firms).values({
-      name: "Acme Audit Partners",
-      subdomain: "acme",
-    }).onConflictDoUpdate({ target: firms.subdomain, set: { name: "Acme Audit Partners" } }).returning();
-
-    const [firm2] = await db.insert(firms).values({
-      name: "Globex Tax Advisors",
-      subdomain: "globex",
-    }).onConflictDoUpdate({ target: firms.subdomain, set: { name: "Globex Tax Advisors" } }).returning();
-
-    // Assign roles
-    await db.insert(firmUsers).values([
-      { userId: user1.id, firmId: firm1.id, role: "FIRM_OWNER" },
-      { userId: user2.id, firmId: firm2.id, role: "PARTNER" },
-      { userId: staff1.id, firmId: firm1.id, role: "STAFF" },
-      { userId: manager1.id, firmId: firm1.id, role: "MANAGER" },
-      { userId: student1.id, firmId: firm1.id, role: "ARTICLED_STUDENT" },
-    ]).onConflictDoNothing();
-
-    const profileSeeds = [
-      { userId: user1.id, firmId: firm1.id, employeeCode: "P001", fullName: "Firm Owner", type: "PARTNER", designation: "Proprietor" },
-      { userId: manager1.id, firmId: firm1.id, employeeCode: "M001", fullName: "Test Manager", type: "MANAGER", designation: "Audit Manager" },
-      { userId: staff1.id, firmId: firm1.id, employeeCode: "S001", fullName: "Test Staff", type: "STAFF", designation: "Audit Staff" },
-      { userId: student1.id, firmId: firm1.id, employeeCode: "AS001", fullName: "Test Articled Student", type: "ARTICLED_STUDENT", designation: "Articled Student" },
+    // FAMES & R Partners mapped from ICAB directory
+    const icabPartners = [
+      { email: "fmrashid@yahoo.com", fullName: "Rashid, Md Abdur", empCode: "474", role: "PARTNER" },
+      { email: "hoquezhc@yahoo.com", fullName: "Hoque, Abu Sharf Manjurul", empCode: "695", role: "PARTNER" },
+      { email: "shafi.selim1960@gmail.com", fullName: "Ahmed, Shafi Uddin", empCode: "839", role: "PARTNER" },
+      { email: "haque.fouzia@gmail.com", fullName: "Haque, Fouzia", empCode: "1032", role: "PARTNER" },
+      { email: "wadudca@gmail.com", fullName: "Wadud, Md. Abdul", empCode: "1379", role: "PARTNER" },
+      { email: "dishaarif4@gmail.com", fullName: "Hoque, Evana", empCode: "1459", role: "PARTNER" }
     ];
-    for (const profile of profileSeeds) {
-      const existing = await db.select().from(peopleProfiles).where(eq(peopleProfiles.userId, profile.userId));
-      if (!existing.length) await db.insert(peopleProfiles).values(profile);
+
+    const userRecords = [];
+    for (const p of icabPartners) {
+      const [u] = await db.insert(users).values({
+        email: p.email,
+        passwordHash,
+      }).onConflictDoUpdate({ target: users.email, set: { email: p.email } }).returning();
+      userRecords.push({ ...p, id: u.id });
     }
 
-    console.log("âœ… Development data seeded.");
+    // Create FAMES & R firm
+    // using "fames-r" as defined by backend/tests/platform-contract.test.ts
+    const [firm1] = await db.insert(firms).values({
+      name: "FAMES & R",
+      subdomain: "fames-r",
+    }).onConflictDoUpdate({ target: firms.subdomain, set: { name: "FAMES & R" } }).returning();
 
-    console.log(`Seeded Firm 1 (${firm1.name}) owner account: ${user1.email}`);
-    console.log(`Seeded Firm 2 (${firm2.name}) partner account: ${user2.email}`);
-    console.log(`Seeded Firm 1 manager account: ${manager1.email}`);
-    console.log(`Seeded Firm 1 staff account: ${staff1.email}`);
-    console.log(`Seeded Firm 1 student account: ${student1.email}`);
+    // Assign roles & profiles
+    for (const ur of userRecords) {
+      await db.insert(firmUsers).values({
+        userId: ur.id,
+        firmId: firm1.id,
+        role: ur.role as any
+      }).onConflictDoNothing();
+
+      const existing = await db.select().from(peopleProfiles).where(eq(peopleProfiles.userId, ur.id));
+      if (!existing.length) {
+        await db.insert(peopleProfiles).values({
+          userId: ur.id,
+          firmId: firm1.id,
+          employeeCode: ur.empCode,
+          fullName: ur.fullName,
+          type: "PARTNER",
+          designation: "Partner"
+        });
+      }
+    }
+
+    console.log("✅ Development data seeded with FAMES & R mapping.");
+    console.log(`Seeded Firm: ${firm1.name} (${firm1.subdomain})`);
+    
     process.exit(0);
   } catch (error) {
-    console.error("âŒ Seeding failed:", error);
+    console.error("❌ Seeding failed:", error);
     process.exit(1);
   }
 }

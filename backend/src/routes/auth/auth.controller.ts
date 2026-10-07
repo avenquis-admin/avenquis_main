@@ -1,6 +1,6 @@
-﻿import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { db } from "../../db";
-import { users, firmUsers, firms, passwordResetTokens, activationTokens, accessRequests, platformSubscriptions, creditWallets } from "../../db/schema";
+import { users, firmUsers, firms, passwordResetTokens, activationTokens, accessRequests, platformSubscriptions, creditWallets, peopleProfiles } from "../../db/schema";
 import { eq, and, isNull, gt, or } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -84,17 +84,27 @@ export const me = async (req: Request, res: Response, next: NextFunction) => {
 
     const primaryFirm = memberships[0] || null;
 
+    // Fetch profile identity if available
+    let profile = null;
+    if (primaryFirm) {
+      const [p] = await db.select().from(peopleProfiles).where(and(eq(peopleProfiles.userId, userId), eq(peopleProfiles.firmId, primaryFirm.firmId)));
+      profile = p;
+    } else {
+      const [p] = await db.select().from(peopleProfiles).where(eq(peopleProfiles.userId, userId));
+      profile = p;
+    }
+
     res.json({
       success: true,
       data: {
         id: user.id,
         email: user.email,
-        fullName: user.fullName || user.email.split("@")[0],
+        fullName: profile?.fullName || user.fullName || user.email.split("@")[0],
         status: user.status,
         platformRole: user.platformRole,
         firmId: primaryFirm?.firmId?.toString() || null,
         firmName: primaryFirm?.firmName || null,
-        role: primaryFirm?.role || user.accountRole || null,
+        role: profile?.designation || primaryFirm?.role || user.accountRole || null,
         firms: memberships.map(m => ({
           firmId: m.firmId,
           firmName: m.firmName,

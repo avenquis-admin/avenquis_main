@@ -45,16 +45,14 @@ export class ApiError extends Error {
   }
 }
 
-const TOKEN_KEY = 'avenquis_platform_token';
+const TOKEN_KEY = 'avenquis_tenant_token';
 
 export function getDataMode(): 'api' | 'mock' {
   const env = (import.meta as unknown as {
     env: Record<string, string>;
   }).env;
 
-  return env?.VITE_DATA_MODE === 'mock'
-    ? 'mock'
-    : 'api';
+  return 'api';
 }
 
 class ApiClient {
@@ -156,7 +154,7 @@ class ApiClient {
     }
 
     try {
-      const stored = localStorage.getItem('avenquis_platform_session');
+      const stored = localStorage.getItem('avenquis_tenant_session');
       if (stored) {
         const user = JSON.parse(stored);
         if (user?.firmId) {
@@ -322,3 +320,4 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
+
