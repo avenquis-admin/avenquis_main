@@ -81,7 +81,7 @@ import {
   X,
 } from 'lucide-react';
 
-type View = 'login' | 'dashboard' | 'people' | 'students' | 'engagement' | 'engagements' | 'tasks' | 'timesheets' | 'documents' | 'workingpapers' | 'review' | 'requests' | 'finance' | 'settings' | 'notifications' | 'create';
+type View = 'login' | 'dashboard' | 'people' | 'students' | 'engagement' | 'engagements' | 'tasks' | 'timesheets' | 'documents' | 'workingpapers' | 'review' | 'requests' | 'finance' | 'settings' | 'notifications' | 'create' | 'request-access';
 
 type IconType = typeof LayoutDashboard;
 
@@ -407,7 +407,97 @@ function SimplePage({ title, subtitle, endpoint, onMenu }: { title: string; subt
   </div></main></>;
 }
 
-function Login({ onSignIn }: { onSignIn: () => void }) {
+
+function RequestAccess({ onBack }: { onBack: () => void }) {
+  const [formData, setFormData] = useState({
+    firmName: '',
+    requesterName: '',
+    requesterEmail: '',
+    mobile: '',
+    professionalRegistration: '',
+    professionalRole: '',
+    reasonUseCase: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!formData.firmName || !formData.requesterName || !formData.requesterEmail || !formData.mobile || !formData.professionalRole || !formData.reasonUseCase) {
+      setError('Please fill out all required fields.');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const { apiClient } = await import('./services/apiClient');
+      const payload = {
+        requestType: 'individual',
+        ...formData
+      };
+      const res = await apiClient.post('/public/access-requests', payload);
+      if (res.ok) {
+        setSuccess(true);
+      } else {
+        const errorData = res.data as any;
+        setError(errorData?.message || 'Submission failed');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Submission failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="login-screen" style={{ justifyContent: 'center' }}>
+        <div className="login-card" style={{ maxWidth: 500, textAlign: 'center' }}>
+          <h2>Request Submitted</h2>
+          <p>Your access request has been successfully submitted and is pending review. We will contact you shortly.</p>
+          <button onClick={onBack} className="login-submit" style={{ marginTop: 20 }}>Back to Login</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="login-screen" style={{ overflowY: 'auto' }}>
+      <header className="login-header">
+        <Logo />
+        <nav><a>About</a><a>Features</a><a>Pricing</a></nav>
+        <div className="login-actions">
+          <button onClick={onBack} className="sign-in-top">Back to Login</button>
+        </div>
+      </header>
+      <div className="login-body" style={{ alignItems: 'flex-start', paddingTop: 60, paddingBottom: 60 }}>
+        <div className="login-card" style={{ width: '100%', maxWidth: 550, margin: '0 auto' }}>
+          <h2>Request Access</h2>
+          <p>Request an account for your firm to start using AVENQUIS Core.</p>
+
+          <label>Firm Name *<div className="input-wrap"><BriefcaseBusiness size={17}/><input value={formData.firmName} onChange={e => setFormData({...formData, firmName: e.target.value})} placeholder="E.g. FAMES & R" /></div></label>
+          <label>Applicant Full Name *<div className="input-wrap"><Users size={17}/><input value={formData.requesterName} onChange={e => setFormData({...formData, requesterName: e.target.value})} placeholder="Your full name" /></div></label>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <label style={{ flex: 1 }}>Email *<div className="input-wrap"><Mail size={17}/><input value={formData.requesterEmail} onChange={e => setFormData({...formData, requesterEmail: e.target.value})} placeholder="name@company.com" /></div></label>
+            <label style={{ flex: 1 }}>Mobile *<div className="input-wrap"><input value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})} placeholder="+880..." /></div></label>
+          </div>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <label style={{ flex: 1 }}>Designation / Role *<div className="input-wrap"><input value={formData.professionalRole} onChange={e => setFormData({...formData, professionalRole: e.target.value})} placeholder="E.g. Partner" /></div></label>
+            <label style={{ flex: 1 }}>ICAB Membership No.<div className="input-wrap"><input value={formData.professionalRegistration} onChange={e => setFormData({...formData, professionalRegistration: e.target.value})} placeholder="Optional" /></div></label>
+          </div>
+          <label>Message / Reason for Access *<div className="input-wrap" style={{ height: 'auto', padding: 0 }}><textarea rows={3} value={formData.reasonUseCase} onChange={e => setFormData({...formData, reasonUseCase: e.target.value})} placeholder="Why do you need access?" style={{ width: '100%', border: 'none', padding: '12px 16px', outline: 'none', background: 'transparent', resize: 'vertical' }} /></div></label>
+
+          {error && <div style={{ color: 'red', marginBottom: 10, fontSize: 14 }}>{error}</div>}
+          <button onClick={handleSubmit} disabled={loading} className="login-submit">
+            {loading ? 'Submitting...' : 'Submit Request'} <ArrowRight size={19}/>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Login({ onSignIn, onRequestAccess }: { onSignIn: () => void; onRequestAccess: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -422,7 +512,7 @@ function Login({ onSignIn }: { onSignIn: () => void }) {
     } catch (e) {
       setError(String(e));
     }
-  }; return <div className="login-screen"><header className="login-header"><Logo /><nav><a>About</a><a>Features</a><a>Pricing</a></nav><div className="login-actions"><button className="sun-button"><Sparkles size={18}/></button><button onClick={onSignIn} className="sign-in-top">Sign In</button></div></header><div className="login-body"><div className="login-copy"><div className="eyebrow">SMART OFFICE MANAGEMENT <i /> <Sparkles size={14}/></div><h1>Work <em>Smarter.</em><br />Stay Organized.<br /><strong>Grow Together.</strong></h1><p>Manage your people, operations, accounts and<br />daily tasks from one beautiful workspace.<br />Simple, powerful and made for your office.</p><div className="feature-pills"><div className="feature-pill team"><Users size={24}/><span>Team<br />Management</span></div><div className="feature-pill attendance"><CalendarDays size={24}/><span>Attendance<br />Tracking</span></div><div className="feature-pill accounts"><PieChart size={24}/><span>Accounts &amp;<br />Finance</span></div><div className="feature-pill docs"><FileText size={24}/><span>Documents &amp;<br />Reports</span></div></div></div><div className="login-card"><h2>Welcome Back</h2><p>Sign in to continue to your workspace.</p><label>Email Address<div className="input-wrap"><Mail size={17}/><input placeholder="name@company.com" value={email} onChange={e => setEmail(e.target.value)} /></div></label><label>Password<div className="input-wrap"><LockKeyhole size={17}/><input type={showPassword ? 'text' : 'password'} placeholder="••••••••••" value={password} onChange={e => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)}><ShieldCheck size={17}/></button></div></label><div className="remember-row"><span><button className="check-button"><Check size={13}/></button> Remember me</span><a>Forgot password?</a></div>{error && <div style={{color:'red',marginBottom:10}}>{error}</div>}<button onClick={handleSignIn} className="login-submit">Sign In <ArrowRight size={19}/></button><div className="or"><span />or continue with<span /></div><button className="google-button"><b>G</b> Continue with Google</button><div className="create-account">Don’t have an account? <a>Create one</a></div></div></div><footer className="login-footer"><span>© 2026 Avenquis. All rights reserved.</span><span>Privacy Policy | Terms of Service | Support</span></footer></div>; }
+  }; return <div className="login-screen"><header className="login-header"><Logo /><nav><a>About</a><a>Features</a><a>Pricing</a></nav><div className="login-actions"><button className="sun-button"><Sparkles size={18}/></button><button onClick={onSignIn} className="sign-in-top">Sign In</button></div></header><div className="login-body"><div className="login-copy"><div className="eyebrow">SMART OFFICE MANAGEMENT <i /> <Sparkles size={14}/></div><h1>Work <em>Smarter.</em><br />Stay Organized.<br /><strong>Grow Together.</strong></h1><p>Manage your people, operations, accounts and<br />daily tasks from one beautiful workspace.<br />Simple, powerful and made for your office.</p><div className="feature-pills"><div className="feature-pill team"><Users size={24}/><span>Team<br />Management</span></div><div className="feature-pill attendance"><CalendarDays size={24}/><span>Attendance<br />Tracking</span></div><div className="feature-pill accounts"><PieChart size={24}/><span>Accounts &amp;<br />Finance</span></div><div className="feature-pill docs"><FileText size={24}/><span>Documents &amp;<br />Reports</span></div></div></div><div className="login-card"><h2>Welcome Back</h2><p>Sign in to continue to your workspace.</p><label>Email Address<div className="input-wrap"><Mail size={17}/><input placeholder="name@company.com" value={email} onChange={e => setEmail(e.target.value)} /></div></label><label>Password<div className="input-wrap"><LockKeyhole size={17}/><input type={showPassword ? 'text' : 'password'} placeholder="••••••••••" value={password} onChange={e => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)}><ShieldCheck size={17}/></button></div></label><div className="remember-row"><span><button className="check-button"><Check size={13}/></button> Remember me</span><a>Forgot password?</a></div>{error && <div style={{color:'red',marginBottom:10}}>{error}</div>}<button onClick={handleSignIn} className="login-submit">Sign In <ArrowRight size={19}/></button><div className="or"><span />or continue with<span /></div><button className="google-button"><b>G</b> Continue with Google</button><div className="create-account">Don't have an account? <a onClick={onRequestAccess} style={{cursor:'pointer'}}>Request Access</a></div></div></div><footer className="login-footer"><span>© 2026 Avenquis. All rights reserved.</span><span>Privacy Policy | Terms of Service | Support</span></footer></div>; }
 
 const rows: any[] = []; const tasks: any[] = []; const crmTasks: any[] = []; const reviewRows: any[] = []; const notifications: any[] = [];
 function App() {
@@ -450,7 +540,8 @@ function App() {
     return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
   }
 
-  if (view === 'login') return <Login onSignIn={() => setView('dashboard')} />;
+  if (view === 'request-access') return <RequestAccess onBack={() => setView('login')} />;
+  if (view === 'login') return <Login onSignIn={() => setView('dashboard')} onRequestAccess={() => setView('request-access')} />;
 
   const onMenu = () => setSidebarOpen(true);
   const content = view === 'dashboard' ? <Dashboard onPeople={() => setView('people')} onMenu={onMenu} /> : view === 'people' ? <PeopleView onMenu={onMenu} /> : view === 'engagement' ? <EngagementView onMenu={onMenu} /> : view === 'tasks' ? <TasksView onMenu={onMenu} /> : view === 'review' ? <ReviewView onMenu={onMenu} /> : view === 'workingpapers' ? <AuditView onMenu={onMenu} /> : view === 'notifications' ? <NotificationsView onMenu={onMenu} onCreate={() => setView('create')} /> : view === 'create' ? <CreateView onMenu={onMenu} /> : view === 'engagements' ? <PerformanceView onMenu={onMenu} /> : view === 'students' ? <SimplePage title="Students / Articleship" subtitle="Manage student records, batches, exams, terms and progress." endpoint="/people?type=Student" onMenu={onMenu} /> : view === 'timesheets' ? <SimplePage title="Timesheets" subtitle="Track actual time entries, attendance and approval status." endpoint="/timesheets" onMenu={onMenu} /> : view === 'documents' ? <SimplePage title="Document Vault" subtitle="Find, organize and securely access client and engagement documents." endpoint="/documents" onMenu={onMenu} /> : view === 'requests' ? <SimplePage title="Client Requests" subtitle="Track incoming information requests, response times and deadlines." endpoint="/client-portal/document-requests" onMenu={onMenu} /> : view === 'finance' ? <SimplePage title="Office Finance" subtitle="Manage firm income, receivables, expenses, invoices and payments in BDT." endpoint="/finance/invoices" onMenu={onMenu} /> : <SimplePage title="Settings" subtitle="Manage firm profile, users, permissions, workflows and preferences." endpoint="/firm/settings" onMenu={onMenu} />;
