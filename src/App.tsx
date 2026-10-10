@@ -455,7 +455,7 @@ function RequestAccessModal({ onClose }: { onClose: () => void }) {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
-      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      backgroundColor: 'rgba(251, 249, 244, 0.75)',
       backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '24px', overflowY: 'auto'
@@ -464,7 +464,7 @@ function RequestAccessModal({ onClose }: { onClose: () => void }) {
         maxWidth: 550, width: '100%', position: 'relative',
         margin: 'auto', padding: '32px 40px',
         boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
-        borderRadius: 24, background: 'white'
+        borderRadius: 24, background: '#fcfaf5'
       }}>
         <button onClick={onClose} style={{
           position: 'absolute', top: 20, right: 20,
