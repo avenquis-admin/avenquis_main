@@ -408,7 +408,7 @@ function SimplePage({ title, subtitle, endpoint, onMenu }: { title: string; subt
 }
 
 
-function RequestAccess({ onBack }: { onBack: () => void }) {
+function RequestAccessModal({ onClose }: { onClose: () => void }) {
   const [formData, setFormData] = useState({
     firmName: '',
     requesterName: '',
@@ -438,6 +438,9 @@ function RequestAccess({ onBack }: { onBack: () => void }) {
       const res = await apiClient.post('/public/access-requests', payload);
       if (res.ok) {
         setSuccess(true);
+        setTimeout(() => {
+          onClose();
+        }, 2000);
       } else {
         const errorData = res.data as any;
         setError(errorData?.message || 'Submission failed');
@@ -449,49 +452,65 @@ function RequestAccess({ onBack }: { onBack: () => void }) {
     }
   };
 
-  if (success) {
-    return (
-      <div className="login-screen" style={{ justifyContent: 'center' }}>
-        <div className="login-card" style={{ maxWidth: 500, textAlign: 'center' }}>
-          <h2>Request Submitted</h2>
-          <p>Your access request has been successfully submitted and is pending review. We will contact you shortly.</p>
-          <button onClick={onBack} className="login-submit" style={{ marginTop: 20 }}>Back to Login</button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="login-screen" style={{ overflowY: 'auto' }}>
-      <header className="login-header">
-        <Logo />
-        <nav><a>About</a><a>Features</a><a>Pricing</a></nav>
-        <div className="login-actions">
-          <button onClick={onBack} className="sign-in-top">Back to Login</button>
-        </div>
-      </header>
-      <div className="login-body" style={{ alignItems: 'flex-start', paddingTop: 60, paddingBottom: 60 }}>
-        <div className="login-card" style={{ width: '100%', maxWidth: 550, margin: '0 auto' }}>
-          <h2>Request Access</h2>
-          <p>Request an account for your firm to start using AVENQUIS Core.</p>
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      backdropFilter: 'blur(8px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '24px', overflowY: 'auto'
+    }}>
+      <div className="login-card" style={{
+        maxWidth: 550, width: '100%', position: 'relative',
+        margin: 'auto', padding: '32px 40px',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.08)',
+        borderRadius: 24, background: 'white'
+      }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 20, right: 20,
+          background: 'none', border: 'none', cursor: 'pointer',
+          padding: 8, display: 'flex', color: '#64748b'
+        }}>
+          <X size={20} />
+        </button>
 
-          <label>Firm Name *<div className="input-wrap"><BriefcaseBusiness size={17}/><input value={formData.firmName} onChange={e => setFormData({...formData, firmName: e.target.value})} placeholder="E.g. FAMES & R" /></div></label>
-          <label>Applicant Full Name *<div className="input-wrap"><Users size={17}/><input value={formData.requesterName} onChange={e => setFormData({...formData, requesterName: e.target.value})} placeholder="Your full name" /></div></label>
-          <div style={{ display: 'flex', gap: 16 }}>
-            <label style={{ flex: 1 }}>Email *<div className="input-wrap"><Mail size={17}/><input value={formData.requesterEmail} onChange={e => setFormData({...formData, requesterEmail: e.target.value})} placeholder="name@company.com" /></div></label>
-            <label style={{ flex: 1 }}>Mobile *<div className="input-wrap"><input value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})} placeholder="+880..." /></div></label>
+        {success ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <div style={{ background: '#ecfdf5', color: '#10b981', width: 64, height: 64, borderRadius: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <CheckCircle2 size={32} />
+            </div>
+            <h2 style={{ marginBottom: 12 }}>Request Submitted</h2>
+            <p style={{ color: '#64748b', lineHeight: 1.6 }}>Your access request has been successfully submitted and is pending review. We will contact you shortly.</p>
           </div>
-          <div style={{ display: 'flex', gap: 16 }}>
-            <label style={{ flex: 1 }}>Designation / Role *<div className="input-wrap"><input value={formData.professionalRole} onChange={e => setFormData({...formData, professionalRole: e.target.value})} placeholder="E.g. Partner" /></div></label>
-            <label style={{ flex: 1 }}>ICAB Membership No.<div className="input-wrap"><input value={formData.professionalRegistration} onChange={e => setFormData({...formData, professionalRegistration: e.target.value})} placeholder="Optional" /></div></label>
-          </div>
-          <label>Message / Reason for Access *<div className="input-wrap" style={{ height: 'auto', padding: 0 }}><textarea rows={3} value={formData.reasonUseCase} onChange={e => setFormData({...formData, reasonUseCase: e.target.value})} placeholder="Why do you need access?" style={{ width: '100%', border: 'none', padding: '12px 16px', outline: 'none', background: 'transparent', resize: 'vertical' }} /></div></label>
+        ) : (
+          <>
+            <h2 style={{ marginTop: 0, marginBottom: 8 }}>Request Access</h2>
+            <p style={{ color: '#64748b', marginBottom: 24 }}>Request an account for your firm to start using AVENQUIS Core.</p>
 
-          {error && <div style={{ color: 'red', marginBottom: 10, fontSize: 14 }}>{error}</div>}
-          <button onClick={handleSubmit} disabled={loading} className="login-submit">
-            {loading ? 'Submitting...' : 'Submit Request'} <ArrowRight size={19}/>
-          </button>
-        </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <label>Firm Name *<div className="input-wrap"><BriefcaseBusiness size={17}/><input value={formData.firmName} onChange={e => setFormData({...formData, firmName: e.target.value})} placeholder="E.g. FAMES & R" /></div></label>
+              <label>Applicant Full Name *<div className="input-wrap"><Users size={17}/><input value={formData.requesterName} onChange={e => setFormData({...formData, requesterName: e.target.value})} placeholder="Your full name" /></div></label>
+              
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                <label style={{ flex: '1 1 200px' }}>Email *<div className="input-wrap"><Mail size={17}/><input value={formData.requesterEmail} onChange={e => setFormData({...formData, requesterEmail: e.target.value})} placeholder="name@company.com" /></div></label>
+                <label style={{ flex: '1 1 200px' }}>Mobile *<div className="input-wrap"><input value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})} placeholder="+880..." /></div></label>
+              </div>
+
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                <label style={{ flex: '1 1 200px' }}>Designation / Role *<div className="input-wrap"><input value={formData.professionalRole} onChange={e => setFormData({...formData, professionalRole: e.target.value})} placeholder="E.g. Partner" /></div></label>
+                <label style={{ flex: '1 1 200px' }}>ICAB Membership No.<div className="input-wrap"><input value={formData.professionalRegistration} onChange={e => setFormData({...formData, professionalRegistration: e.target.value})} placeholder="Optional" /></div></label>
+              </div>
+              
+              <label>Message / Reason for Access *<div className="input-wrap" style={{ height: 'auto', padding: 0 }}><textarea rows={3} value={formData.reasonUseCase} onChange={e => setFormData({...formData, reasonUseCase: e.target.value})} placeholder="Why do you need access?" style={{ width: '100%', border: 'none', padding: '12px 16px', outline: 'none', background: 'transparent', resize: 'vertical', fontFamily: 'inherit' }} /></div></label>
+            </div>
+
+            {error && <div style={{ color: '#ef4444', marginTop: 16, fontSize: 14, background: '#fef2f2', padding: '12px 16px', borderRadius: 8 }}>{error}</div>}
+            
+            <button onClick={handleSubmit} disabled={loading} className="login-submit" style={{ marginTop: 24, width: '100%' }}>
+              {loading ? 'Submitting...' : 'Submit Request'} <ArrowRight size={19}/>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -545,8 +564,14 @@ function App() {
     return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
   }
 
-  if (view === 'request-access') return <RequestAccess onBack={() => setView('login')} />;
-  if (view === 'login') return <Login onSignIn={() => setView('dashboard')} onRequestAccess={() => setView('request-access')} />;
+  if (view === 'login' || view === 'request-access') {
+    return (
+      <>
+        <Login onSignIn={() => setView('dashboard')} onRequestAccess={() => setView('request-access')} />
+        {view === 'request-access' && <RequestAccessModal onClose={() => setView('login')} />}
+      </>
+    );
+  }
 
   const onMenu = () => setSidebarOpen(true);
   const content = view === 'dashboard' ? <Dashboard onPeople={() => setView('people')} onMenu={onMenu} /> : view === 'people' ? <PeopleView onMenu={onMenu} /> : view === 'engagement' ? <EngagementView onMenu={onMenu} /> : view === 'tasks' ? <TasksView onMenu={onMenu} /> : view === 'review' ? <ReviewView onMenu={onMenu} /> : view === 'workingpapers' ? <AuditView onMenu={onMenu} /> : view === 'notifications' ? <NotificationsView onMenu={onMenu} onCreate={() => setView('create')} /> : view === 'create' ? <CreateView onMenu={onMenu} /> : view === 'engagements' ? <PerformanceView onMenu={onMenu} /> : view === 'students' ? <SimplePage title="Students / Articleship" subtitle="Manage student records, batches, exams, terms and progress." endpoint="/people?type=Student" onMenu={onMenu} /> : view === 'timesheets' ? <SimplePage title="Timesheets" subtitle="Track actual time entries, attendance and approval status." endpoint="/timesheets" onMenu={onMenu} /> : view === 'documents' ? <SimplePage title="Document Vault" subtitle="Find, organize and securely access client and engagement documents." endpoint="/documents" onMenu={onMenu} /> : view === 'requests' ? <SimplePage title="Client Requests" subtitle="Track incoming information requests, response times and deadlines." endpoint="/client-portal/document-requests" onMenu={onMenu} /> : view === 'finance' ? <SimplePage title="Office Finance" subtitle="Manage firm income, receivables, expenses, invoices and payments in BDT." endpoint="/finance/invoices" onMenu={onMenu} /> : <SimplePage title="Settings" subtitle="Manage firm profile, users, permissions, workflows and preferences." endpoint="/firm/settings" onMenu={onMenu} />;
