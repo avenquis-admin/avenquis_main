@@ -521,20 +521,25 @@ function App() {
   const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   useEffect(() => {
+    let unsub: (() => void) | null = null;
     import('./services/authService').then(({ authService }) => {
       authService.bootstrap().then(() => {
         setIsBootstrapping(false);
       });
 
-      return authService.subscribe((user) => {
+      unsub = authService.subscribe((user) => {
         if (!user) {
-          setView('login');
-        } else if (view === 'login') {
-          setView('dashboard');
+          setView((prev) => (prev === 'request-access' ? 'request-access' : 'login'));
+        } else {
+          setView((prev) => (prev === 'login' || prev === 'request-access' ? 'dashboard' : prev));
         }
       });
     });
-  }, [view]);
+    
+    return () => {
+      if (unsub) unsub();
+    };
+  }, []);
 
   if (isBootstrapping) {
     return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
